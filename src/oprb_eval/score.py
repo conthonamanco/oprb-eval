@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import random
 import statistics
 from collections import defaultdict
 from dataclasses import asdict
@@ -13,6 +14,7 @@ from .metrics import score_page
 from .text import prediction_text, reference_text
 
 PROTOCOLS = ("notebook", "normalized")
+RESAMPLES = 1000
 GROUPINGS = {
     "overall": (),
     "category": ("category",),
@@ -53,6 +55,26 @@ def score_pages(
     return rows, empty_gt
 
 
+def bootstrap(rows: list[dict], metrics: tuple[str, ...]) -> dict[str, float]:
+    """95% percentile bootstrap interval of each mean, resampling pages.
+
+    It ignores stratification and the finite size of the test set, so for a sample of the
+    test set the interval is, if anything, slightly too wide.
+    """
+    rng = random.Random(0)
+    values = [tuple(row[m] for m in metrics) for row in rows]
+    means = [
+        [statistics.fmean(column) for column in zip(*rng.choices(values, k=len(values)))]
+        for _ in range(RESAMPLES)
+    ]
+    result = {}
+    for name, column in zip(metrics, zip(*means), strict=True):
+        ordered = sorted(column)
+        result[f"{name}_low"] = ordered[int(0.025 * RESAMPLES)]
+        result[f"{name}_high"] = ordered[int(0.975 * RESAMPLES) - 1]
+    return result
+
+
 def aggregate(rows: list[dict], by: tuple[str, ...]) -> list[dict]:
     groups: dict[tuple, list[dict]] = defaultdict(list)
     for row in rows:
@@ -67,6 +89,7 @@ def aggregate(rows: list[dict], by: tuple[str, ...]) -> list[dict]:
         summary["n_truncated"] = sum(r["truncated"] for r in members)
         for metric in ("cer", "wer", "precision", "recall", "f1"):
             summary[f"{metric}_mean"] = statistics.fmean(r[metric] for r in members)
+        summary |= bootstrap(members, ("cer", "wer", "f1"))
         summary["cer_median"] = statistics.median(r["cer"] for r in members)
         summary["wer_median"] = statistics.median(r["wer"] for r in members)
         summary["cer_micro"] = sum(r["char_errors"] for r in members) / ref_chars

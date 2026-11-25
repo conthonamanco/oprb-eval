@@ -158,12 +158,40 @@ class DataTest(unittest.TestCase):
         make_dataset(self.root)
         pages = data.collect_pages(self.root)
         self.assertEqual(len(pages), 24)
-        small, large = data.stratified_sample(pages, 4), data.stratified_sample(pages, 9)
-        self.assertEqual(len(small), 8)
+        small, large = data.stratified_sample(pages, 8), data.stratified_sample(pages, 18)
         self.assertEqual(len({(p.category, p.occlusion_type, p.density) for p in small}), 8)
-        self.assertLess({p.key for p in small}, {p.key for p in large})
-        self.assertEqual(small, data.stratified_sample(list(reversed(pages)), 4))
+        self.assertEqual(small, large[:8])
+        self.assertEqual(small, data.stratified_sample(list(reversed(pages)), 8))
+        self.assertNotEqual(small, data.stratified_sample(pages, 8, seed=1))
         self.assertEqual(len(data.stratified_sample(pages, 999)), 24)
+
+    def test_sample_keeps_the_proportions_of_the_test_set(self):
+        pages = []
+        for category, count in data.EXPECTED.items():
+            for i in range(count):
+                kind = "AAAAAABBBC"[i % 10]  # uneven groups: 60%, 30%, 10%
+                stem = f"{kind}__1p0pct__{i}"
+                pages.append(data.Page(category, stem, Path(stem), Path(stem), kind, "1p0pct"))
+        for total, text in ((1000, 667), (2000, 1333), (3000, 2000)):
+            sample = data.stratified_sample(pages, total)
+            self.assertEqual(len({p.key for p in sample}), total)
+            self.assertEqual(sum(p.category == "text" for p in sample), text)
+            for category in data.EXPECTED:
+                kinds = [p.occlusion_type for p in sample if p.category == category]
+                for kind, share in (("A", 0.6), ("B", 0.3), ("C", 0.1)):
+                    self.assertAlmostEqual(kinds.count(kind), share * len(kinds), delta=1.5)
+
+    def test_pages_of_tiny_groups_are_drawn_as_often_as_others(self):
+        def page(kind, i):
+            stem = f"{kind}__1p0pct__{i}"
+            return data.Page("text", stem, Path(stem), Path(stem), kind, "1p0pct")
+
+        pages = [page("Big", i) for i in range(59)] + [page("Tiny", 0)]
+        hits = sum(
+            any(p.occlusion_type == "Tiny" for p in data.stratified_sample(pages, 20, seed))
+            for seed in range(600)
+        )
+        self.assertAlmostEqual(hits / 600, 1 / 3, delta=0.08)
 
     def test_extract_flat_ignores_archive_paths(self):
         archive = self.root / "x.tar.gz"
@@ -288,6 +316,14 @@ class RunnerTest(unittest.TestCase):
         self.assertAlmostEqual(total["cer_micro"], 2 / 8)
         self.assertEqual(total["cer_median"], 0)
 
+    def test_bootstrap_interval(self):
+        values = [i / 100 for i in range(101)]
+        interval = score.bootstrap([{"f1": v} for v in values], ("f1",))
+        half = 1.96 * (sum((v - 0.5) ** 2 for v in values) / 101**2) ** 0.5
+        self.assertAlmostEqual(interval["f1_low"], 0.5 - half, delta=0.01)
+        self.assertAlmostEqual(interval["f1_high"], 0.5 + half, delta=0.01)
+        self.assertEqual(score.bootstrap([{"f1": 0.3}], ("f1",)), {"f1_low": 0.3, "f1_high": 0.3})
+
     def test_latency_is_one_image_at_a_time_and_excludes_failures(self):
         model = FakeModel(bad="Black_Ink__0p5pct")
         report = runner.measure_latency(
@@ -316,14 +352,18 @@ class CliTest(unittest.TestCase):
     def test_end_to_end(self):
         with mock.patch.dict(data.EXPECTED, {"text": 12, "nontext": 12}):
             self.cli("stats")
-            self.cli("run", *self.model, *self.config, "--sample", "4")
+            self.cli("stats", "--sample", "8")
+            self.cli("run", *self.model, *self.config, "--sample", "8")
             with self.assertRaises(SystemExit):  # an incomplete run must not be scored
                 self.cli("score", *self.model)
-            self.assertIn("[notebook/sample4] n=8", self.cli("score", *self.model, "--sample", "4"))
+            self.assertIn("[notebook/sample8] n=8", self.cli("score", *self.model, "--sample", "8"))
+            listed = (self.root / "results" / "pages_sample8.txt").read_text(encoding="utf-8")
+            predicted = runner.load_predictions(self.root / "results" / "smoke")
+            self.assertEqual(listed.splitlines(), sorted(predicted))
             for shard in ("0/2", "1/2"):
                 self.cli("run", *self.model, *self.config, "--shard", shard, "--batch-size", "5")
             self.assertIn("[notebook/full] n=24", self.cli("score", *self.model))
-            self.assertIn("n=4", self.cli("latency", *self.model, *self.config, "--sample", "2"))
+            self.assertIn("n=4", self.cli("latency", *self.model, *self.config, "--sample", "4"))
         path = self.root / "results" / "smoke" / "summary_notebook_full_type.csv"
         with path.open(encoding="utf-8") as f:
             self.assertEqual(len(list(csv.DictReader(f))), 4)

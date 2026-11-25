@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import random
+import hashlib
 import shutil
 import tarfile
 import urllib.request
@@ -75,29 +75,36 @@ def require_full_test_set(pages: list[Page]) -> None:
             raise SystemExit(f"{category}: found {count} pages, expected {EXPECTED[category]}.")
 
 
-def stratified_sample(pages: list[Page], per_category: int, seed: int = 42) -> list[Page]:
-    """Deterministic sample, spread evenly over (type, density) within each category.
+def _draw(*parts) -> float:
+    """Pseudo-random number in [0, 1), the same on every Python version and machine."""
+    digest = hashlib.sha256("/".join(map(str, parts)).encode()).digest()
+    return int.from_bytes(digest[:6], "big") / 2**48
 
-    Strata are served round-robin, so rare strata are not lost in small samples, and a
-    larger sample with the same seed contains the smaller one.
+
+def stratified_sample(pages: list[Page], total: int, seed: int = 42) -> list[Page]:
+    """`total` random pages that keep the proportions of `pages`.
+
+    Categories keep their ratio (2:1 in OPRB), and so do (type, density) groups inside each
+    category, so plain means over the sample estimate means over all pages. Pages come in
+    drawing order: a smaller sample with the same seed is a prefix of a larger one.
     """
     strata: dict[str, dict[tuple[str, str], list[Page]]] = defaultdict(lambda: defaultdict(list))
-    for page in sorted(pages, key=lambda p: p.key):
+    for page in pages:
         strata[page.category][(page.occlusion_type, page.density)].append(page)
 
-    chosen: list[Page] = []
+    ranked: list[tuple[float, str, Page]] = []
     for category, groups in strata.items():
-        queues = []
-        for name, members in sorted(groups.items()):
-            random.Random(f"{seed}/{category}/{name}").shuffle(members)
-            queues.append(members)
-        picked: list[Page] = []
-        while len(picked) < per_category and any(queues):
-            for queue in queues:
-                if queue and len(picked) < per_category:
-                    picked.append(queue.pop())
-        chosen.extend(picked)
-    return sorted(chosen, key=lambda p: p.key)
+        spread = []
+        for name, members in groups.items():
+            # A random offset per group, so that pages of groups too small to appear in
+            # every sample are drawn with the same probability as any other page.
+            offset = _draw(seed, category, *name)
+            members.sort(key=lambda p: (_draw(seed, p.key), p.key))
+            spread += [((i + offset) / len(members), p.key, p) for i, p in enumerate(members)]
+        spread.sort(key=lambda item: item[:2])
+        ranked += [((i + 0.5) / len(spread), p.key, p) for i, (_, _, p) in enumerate(spread)]
+    ranked.sort(key=lambda item: item[:2])
+    return [page for _, _, page in ranked[:total]]
 
 
 def extract_flat(archive: Path, destination: Path, suffix: str) -> int:

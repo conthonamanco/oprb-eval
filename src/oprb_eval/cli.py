@@ -18,6 +18,13 @@ def _pages(args) -> list[data.Page]:
     return pages
 
 
+def _tag(args) -> str:
+    """Names output files, so results of different page sets never overwrite each other."""
+    if args.sample is None:
+        return "full"
+    return f"sample{args.sample}" + (f"_seed{args.seed}" if args.seed != 42 else "")
+
+
 def _shard(text: str) -> tuple[int, int]:
     index, _, count = text.partition("/")
     try:
@@ -47,11 +54,17 @@ def cmd_stats(args) -> None:
         {"category": c, "occlusion_type": t, "density": d, "pages": n}
         for (c, t, d), n in sorted(counts.items())
     ]
-    score.write_csv(args.results / "dataset_stats.csv", rows)
+    tag = _tag(args)
+    score.write_csv(args.results / f"dataset_stats_{tag}.csv", rows)
+    if args.sample is not None:
+        keys = "".join(f"{key}\n" for key in sorted(p.key for p in pages))
+        (args.results / f"pages_{tag}.txt").write_text(keys, encoding="utf-8", newline="\n")
     for row in rows:
         print("{category:8} {occlusion_type:18} {density:10} {pages:6}".format(**row))
     for category in data.EXPECTED:
         tokens = [data.read_gt_tokens(p.gt_path) for p in pages if p.category == category]
+        if not tokens:
+            continue
         sizes = sorted(len(t) for t in tokens)
         pseudo = sum(PSEUDO_TOKEN.match(tok) is not None for t in tokens for tok in t)
         print(
@@ -92,7 +105,7 @@ def cmd_run(args) -> None:
 
 def cmd_latency(args) -> None:
     if args.sample is None:
-        raise SystemExit("latency needs --sample, the number of pages per category.")
+        raise SystemExit("latency needs --sample, the number of pages to time.")
     config = models.load_config(args.config, args.model)
     report = runner.measure_latency(
         lambda: models.build(config), args.model, config, _pages(args), args.results / args.model
@@ -115,8 +128,7 @@ def cmd_score(args) -> None:
             f"{missing} of {len(pages)} pages have no prediction. "
             "Finish the run, or score the same --sample that was run."
         )
-    # Sample scores go to separate files so they are never mistaken for final ones.
-    tag = "full" if args.sample is None else f"sample{args.sample}"
+    tag = _tag(args)
     for protocol in score.PROTOCOLS:
         rows, empty_gt = score.score_pages(pages, predictions, protocol)
         score.write_csv(out / f"per_image_{protocol}_{tag}.csv", rows)
@@ -127,7 +139,7 @@ def cmd_score(args) -> None:
             f"[{protocol}/{tag}] n={total['n']} failed={total['n_failed']} empty_gt={empty_gt} "
             f"CER={total['cer_mean']:.4f} WER={total['wer_mean']:.4f} "
             f"P={total['precision_mean']:.4f} R={total['recall_mean']:.4f} "
-            f"F1={total['f1_mean']:.4f}"
+            f"F1={total['f1_mean']:.4f} [{total['f1_low']:.4f}, {total['f1_high']:.4f}]"
         )
 
 
@@ -157,7 +169,7 @@ def main(argv: list[str] | None = None) -> int:
             sub.add_argument("--variants", nargs="*", default=[], metavar="KEY=VALUE,...")
             sub.add_argument("--batch-sizes", nargs="+", type=_positive, default=[1])
             continue
-        sub.add_argument("--sample", type=_positive, help="pages per category; omit for all 9,000")
+        sub.add_argument("--sample", type=_positive, help="total number of random pages; omit for all 9,000")
         sub.add_argument("--seed", type=int, default=42)
         if name == "stats":
             continue

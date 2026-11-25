@@ -1,7 +1,7 @@
 # Đánh giá VLM và OCR nhẹ trên ảnh tài liệu bị che
 
-So sánh **5 model** OCR/VLM nhẹ, dùng nguyên trọng số pretrained, trên **toàn bộ 9.000 ảnh test** của
-[OPRB](https://huggingface.co/datasets/kpurkayastha/OPRB) (6.000 ảnh `text`, 3.000 ảnh `nontext`).
+So sánh **5 model** OCR/VLM nhẹ, dùng nguyên trọng số pretrained, trên **3.000 ảnh** lấy ngẫu nhiên từ
+9.000 ảnh test của [OPRB](https://huggingface.co/datasets/kpurkayastha/OPRB): 2.000 ảnh `text` và 1.000 ảnh `nontext`.
 Thước đo: CER, WER, Precision/Recall/F1 và thời gian suy luận.
 
 | Model | Nhóm | Cách đọc chữ |
@@ -50,24 +50,33 @@ Chạy tay thì đứng ở thư mục gốc của repo. Không cài lại `torc
 pip install -q -e ".[data]"
 python -m unittest discover -s tests
 python -m oprb_eval download                 # khoảng 1,75 GB
-python -m oprb_eval stats
+python -m oprb_eval stats --sample 3000       # kèm danh sách ảnh được chọn
 
 # Thử pipeline bằng model giả
-python -m oprb_eval run   --model smoke --config configs/smoke.toml --sample 20
-python -m oprb_eval score --model smoke --sample 20
+python -m oprb_eval run   --model smoke --config configs/smoke.toml --sample 40
+python -m oprb_eval score --model smoke --sample 40
 ```
 
-Chạy đủ 9.000 ảnh trên Kaggle T4×2, mỗi GPU một nửa:
+Chạy 3.000 ảnh trên Kaggle T4×2, mỗi GPU một nửa:
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python -m oprb_eval run --model qwen3_vl_2b --shard 0/2 --batch-size 8 &
-CUDA_VISIBLE_DEVICES=1 python -m oprb_eval run --model qwen3_vl_2b --shard 1/2 --batch-size 8 &
+CUDA_VISIBLE_DEVICES=0 python -m oprb_eval run --model qwen3_vl_2b --sample 3000 --shard 0/2 --batch-size 8 &
+CUDA_VISIBLE_DEVICES=1 python -m oprb_eval run --model qwen3_vl_2b --sample 3000 --shard 1/2 --batch-size 8 &
 wait
-python -m oprb_eval score   --model qwen3_vl_2b
-python -m oprb_eval latency --model qwen3_vl_2b --sample 50
+python -m oprb_eval score   --model qwen3_vl_2b --sample 3000
+python -m oprb_eval latency --model qwen3_vl_2b --sample 100
 ```
 
 Phiên bị ngắt thì giữ lại thư mục `results/` và chạy lại đúng lệnh cũ: ảnh đã xong được bỏ qua, ảnh lỗi được thử lại.
+
+## Cách lấy mẫu
+
+- `--sample N` là **tổng** số ảnh, seed mặc định 42; bỏ `--sample` thì dùng cả 9.000 ảnh.
+- Lấy ngẫu nhiên phân tầng, giữ đúng tỉ lệ gốc: 2 `text` : 1 `nontext`, và tỉ lệ loại vết × mật độ trong từng vùng.
+  Vì vậy trung bình trên mẫu ước lượng thẳng trung bình trên 9.000 ảnh, không cần trọng số.
+- Cả 5 model dùng cùng một danh sách ảnh; `stats --sample 3000` ghi danh sách ra `results/pages_sample3000.txt`.
+- Mẫu nhỏ là phần đầu của mẫu lớn cùng seed, nên tăng N không phải chạy lại ảnh đã xong.
+- Trung bình CER, WER và F1 kèm khoảng tin cậy bootstrap 95%.
 
 ## Nguyên tắc
 
