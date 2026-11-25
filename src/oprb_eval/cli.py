@@ -63,14 +63,15 @@ def cmd_stats(args) -> None:
 
 def cmd_pilot(args) -> None:
     config = models.load_config(args.config, args.model)
-    images = data.train_images(args.data, args.images)
-    results = pilot.compare(config, images, args.dtypes, args.batch_sizes)
+    pages = data.train_pages(args.data, args.images)
+    results = pilot.compare(config, pages, args.variants, args.batch_sizes)
     out = args.results / "pilot" / f"{args.model}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
-    report = {"environment": env.describe(), "images": [p.name for p in images], "results": results}
+    report = {"environment": env.describe(), "pages": [p.sample_id for p in pages], "results": results}
     out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    for image, text in zip(images, results[0].get("texts", []), strict=False):
-        print(f"--- {image.name}\n{text[:400]}")
+    best = next((r for r in results if "error" not in r), {"texts": []})
+    for page, text in list(zip(pages, best["texts"], strict=False))[:3]:
+        print(f"--- {page.sample_id}\n{text[:400]}")
     if all("error" in r for r in results):
         raise SystemExit("Every variant failed.")
 
@@ -152,8 +153,8 @@ def main(argv: list[str] | None = None) -> int:
         if name == "pilot":
             sub.add_argument("--model", required=True)
             sub.add_argument("--config", type=Path, default=Path("configs/models.toml"))
-            sub.add_argument("--images", type=_positive, default=8)
-            sub.add_argument("--dtypes", nargs="*", default=[])
+            sub.add_argument("--images", type=_positive, default=24)
+            sub.add_argument("--variants", nargs="*", default=[], metavar="KEY=VALUE,...")
             sub.add_argument("--batch-sizes", nargs="+", type=_positive, default=[1])
             continue
         sub.add_argument("--sample", type=_positive, help="pages per category; omit for all 9,000")

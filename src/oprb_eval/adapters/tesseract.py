@@ -8,6 +8,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from ..models import Prediction
+from ..preprocess import deskew, upscale
 from . import cache_dir, files_mb
 
 
@@ -37,6 +38,7 @@ class TesseractModel:
             raise SystemExit(f"Tesseract 5 is required, found {self.version}")
         self.folder = _traineddata(config)
         self.lang = config["lang"]
+        self.scale, self.deskew = config["scale"], config["deskew"]
         self.api = tesserocr.PyTessBaseAPI(
             path=str(self.folder), lang=self.lang, psm=config["psm"], oem=tesserocr.OEM.LSTM_ONLY
         )
@@ -47,7 +49,8 @@ class TesseractModel:
         predictions = []
         for path in image_paths:
             with Image.open(path) as image:
-                self.api.SetImage(image.convert("RGB"))
+                page = upscale(image.convert("RGB"), self.scale)
+            self.api.SetImage(deskew(page) if self.deskew else page)
             predictions.append(Prediction(self.api.GetUTF8Text()))
             self.api.Clear()
         return predictions

@@ -12,6 +12,7 @@ from pathlib import Path
 
 REPO_ID = "kpurkayastha/OPRB"
 EXPECTED = {"text": 6000, "nontext": 3000}
+TRAIN_TEXT_PAGES = 17212
 SUFFIX = {"img": ".jpg", "gt": ".txt"}
 
 
@@ -119,29 +120,38 @@ def extract_flat(archive: Path, destination: Path, suffix: str) -> int:
     return count
 
 
-def train_images(root: Path, count: int) -> list[Path]:
-    """The first `count` training images, streamed so the 3 GB archive is not downloaded."""
-    folder = root / "train_images"
-    folder.mkdir(parents=True, exist_ok=True)
-    have = sorted(folder.glob("*.jpg"))
-    if len(have) >= count:
-        return have[:count]
-    url = f"https://huggingface.co/datasets/{REPO_ID}/resolve/main/train/text/img.tar.gz"
-    found: list[Path] = []
+def _stream_members(kind: str):
+    """(stem, bytes reader) for each training file, streamed instead of downloaded."""
+    url = f"https://huggingface.co/datasets/{REPO_ID}/resolve/main/train/text/{kind}.tar.gz"
     with urllib.request.urlopen(url) as response, tarfile.open(fileobj=response, mode="r|gz") as tar:
         for member in tar:
-            if not member.isfile() or not member.name.lower().endswith(".jpg"):
-                continue
-            stream = tar.extractfile(member)
-            if stream is None:
-                continue
-            target = folder / member.name.replace("\\", "/").rsplit("/", 1)[-1]
-            with stream, target.open("wb") as out:
-                shutil.copyfileobj(stream, out)
-            found.append(target)
-            if len(found) == count:
-                break
-    return sorted(found)
+            if member.isfile() and member.name.lower().endswith(SUFFIX[kind]):
+                name = member.name.replace("\\", "/").rsplit("/", 1)[-1]
+                yield name[: -len(SUFFIX[kind])], lambda m=member: tar.extractfile(m).read()
+
+
+def train_pages(root: Path, count: int) -> list[Page]:
+    """`count` training pages with ground truth, spread evenly over the training archive."""
+    folder = root / f"train_pilot_{count}"
+    if not (folder / "done").exists():
+        wanted: set[str] = set()
+        (folder / "train" / "img").mkdir(parents=True, exist_ok=True)
+        (folder / "train" / "gt").mkdir(parents=True, exist_ok=True)
+        step = TRAIN_TEXT_PAGES // count
+        for i, (stem, read) in enumerate(_stream_members("img")):
+            if i % step == 0:
+                (folder / "train" / "img" / f"{stem}.jpg").write_bytes(read())
+                wanted.add(stem)
+                if len(wanted) == count:
+                    break
+        for stem, read in _stream_members("gt"):
+            if stem in wanted:
+                (folder / "train" / "gt" / f"{stem}.txt").write_bytes(read())
+                wanted.remove(stem)
+                if not wanted:
+                    break
+        (folder / "done").touch()
+    return collect_pages(folder, ("train",))
 
 
 def download(root: Path, categories=("text", "nontext")) -> None:

@@ -27,7 +27,8 @@ src/oprb_eval/
   models.py        giao diện model và danh sách adapter
   adapters/        mỗi họ model một file: tesseract, ppocr, doctr_words, vlm
   reading_order.py khử nghiêng, gom dòng, tách cột cho OCR trả về khung chữ
-  pilot.py         so dtype và batch size trên ảnh train
+  preprocess.py    phóng to, khử nghiêng theo khuyến nghị chính thức của model
+  pilot.py         so các cấu hình trên ảnh train
   runner.py        suy luận (batch, shard, resume) và đo thời gian
   env.py           ghi lại GPU và phiên bản thư viện của mỗi phiên
   score.py         chấm điểm, tổng hợp
@@ -74,6 +75,7 @@ Phiên bị ngắt thì giữ lại thư mục `results/` và chạy lại đún
 - Không chọn prompt hay siêu tham số theo điểm trên tập test.
 - Thiếu ảnh thì từ chối chạy và chấm; ảnh lỗi bị chấm như chuỗi rỗng, không bị loại khỏi trung bình.
 - Thời gian đo riêng, từng ảnh một, trên cùng loại máy; không lấy từ lượt chạy theo batch.
+- Tiền xử lý ảnh chỉ áp dụng khi tài liệu của model khuyến nghị, và được chọn trên ảnh train.
 - Hai VLM dùng greedy decoding; trang lặp một mẫu suốt 256 token thì dừng và được đánh dấu `truncated`.
 - PP-OCR và docTR dùng chung một cách sắp thứ tự đọc; Tesseract và VLM tự sắp.
 - Đổi cấu hình model thì phải chạy lại từ đầu; repo không cho trộn kết quả.

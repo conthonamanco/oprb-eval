@@ -7,6 +7,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from ..models import Prediction
+from ..preprocess import upscale_longest_edge
 
 LOOP_WINDOW = 256  # generated tokens that must be periodic before a page is stopped
 LOOP_PERIOD = 64  # longest period that counts as a loop
@@ -97,7 +98,8 @@ class _VLM:
         images = []
         for path in image_paths:
             with Image.open(path) as image:
-                images.append(image.convert("RGB"))
+                page = image.convert("RGB")
+            images.append(upscale_longest_edge(page, self.config.get("upscale_to", 0)))
         prompt = self.processor.apply_chat_template(
             [{"role": "user", "content": self._content()}],
             tokenize=False,
