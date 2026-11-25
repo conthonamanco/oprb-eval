@@ -54,6 +54,9 @@ class FakeModel:
     def __init__(self, bad=None):
         self.bad, self.batches = bad, []
 
+    def info(self):
+        return {}
+
     def transcribe(self, image_paths):
         self.batches.append(len(image_paths))
         if self.bad and any(self.bad in p.stem for p in image_paths):
@@ -215,7 +218,7 @@ class RunnerTest(unittest.TestCase):
             self.assertTrue(text.endswith(key.split("/", 1)[1]))
 
     def test_wrong_number_of_predictions_is_an_error(self):
-        class Short:
+        class Short(FakeModel):
             def transcribe(self, image_paths):
                 return []
 
@@ -268,7 +271,7 @@ class RunnerTest(unittest.TestCase):
     def test_each_session_records_its_environment(self):
         self.run_model(FakeModel())
         (line,) = (self.out / runner.SESSIONS).read_text(encoding="utf-8").splitlines()
-        expected = {"session", "batch_size", "gpus", "packages", "python", "commit"}
+        expected = {"session", "batch_size", "gpus", "packages", "python", "commit", "model_info"}
         self.assertLessEqual(expected, set(json.loads(line)))
 
     def test_failures_count_as_empty_transcripts(self):

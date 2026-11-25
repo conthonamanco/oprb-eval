@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import platform
 import subprocess
+import sys
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
@@ -13,15 +14,20 @@ PACKAGES = (
     "transformers",
     "accelerate",
     "rapidocr",
+    "onnxruntime",
+    "onnxruntime-gpu",
     "python-doctr",
     "tesserocr",
+    "numpy",
     "pillow",
 )
 
 
 def _command(*args: str) -> str | None:
     try:
-        result = subprocess.run(args, capture_output=True, text=True, timeout=20, cwd=Path(__file__).parent)
+        result = subprocess.run(
+            args, capture_output=True, text=True, timeout=20, cwd=Path(__file__).parent
+        )
     except (OSError, subprocess.TimeoutExpired):
         return None
     return result.stdout.strip() if result.returncode == 0 else None
@@ -44,3 +50,24 @@ def describe() -> dict:
         "commit": _command("git", "rev-parse", "HEAD"),
         "packages": packages,
     }
+
+
+def _cuda():
+    """torch.cuda if the model already uses it, else None. Never imports torch itself."""
+    torch = sys.modules.get("torch")
+    return torch.cuda if torch is not None and torch.cuda.is_available() else None
+
+
+def reset_peak_vram() -> None:
+    if cuda := _cuda():
+        cuda.reset_peak_memory_stats()
+
+
+def peak_vram_mb() -> int | None:
+    cuda = _cuda()
+    return round(cuda.max_memory_allocated() / 1e6) if cuda else None
+
+
+def release_vram() -> None:
+    if cuda := _cuda():
+        cuda.empty_cache()

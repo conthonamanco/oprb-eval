@@ -124,6 +124,7 @@ def run(
     model = build()
     session = f"{int(time.time())}-{index}of{count}"
     info = {"session": session, "started": _now(), "batch_size": batch_size, "pages": len(todo)}
+    info["model_info"] = model.info()
     _append_json(out_dir / SESSIONS, info | env.describe())
 
     start = time.perf_counter()
@@ -166,7 +167,10 @@ def measure_latency(
 ) -> dict:
     """Time one image at a time, in one process, after a few untimed warm-up images."""
     _claim_output(out_dir, name, config)
+    env.reset_peak_vram()
+    start = time.perf_counter()
     model = build()
+    load_seconds = time.perf_counter() - start
     for page in pages[:warmup]:
         _transcribe(model, [page])
     seconds, failed = {}, []
@@ -184,6 +188,9 @@ def measure_latency(
         "fingerprint": fingerprint(config),
         "measured": _now(),
         "environment": env.describe(),
+        "model_info": model.info(),
+        "load_seconds": load_seconds,
+        "peak_vram_mb": env.peak_vram_mb(),
         "n": len(values),
         "n_failed": len(failed),
         "mean": statistics.fmean(values) if values else None,

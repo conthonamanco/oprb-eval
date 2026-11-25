@@ -5,16 +5,19 @@
 [tesseract]
 adapter = "tesseract"
 family = "ocr"
-traineddata = "tessdata_best/eng"
-psm = 3
+lang = "eng"
+tessdata_tag = "4.1.0"  # tessdata_best
+tessdata_bytes = 15400601
+psm = 3  # fully automatic page segmentation
 
 [ppocrv5_mobile_en]
-adapter = "rapidocr"
+adapter = "ppocr"
 family = "ocr"
 ocr_version = "PP-OCRv5"
 det_model = "mobile"
 rec_lang = "en"
 rec_model = "mobile"
+device = "cpu"
 
 [doctr_fast_parseq]
 adapter = "doctr"
@@ -28,7 +31,8 @@ adapter = "lighton"
 family = "ocr-vlm"
 hf_id = "lightonai/LightOnOCR-2-1B"
 revision = "be7c41313c30e940fe5571de59e5fabc779e00c8"
-longest_edge = 1540
+dtype = "float16"  # to be confirmed by the pilot
+image_size = { longest_edge = 1540 }
 max_new_tokens = 4096
 
 [qwen3_vl_2b]
@@ -36,6 +40,7 @@ adapter = "qwen_vl"
 family = "vlm"
 hf_id = "Qwen/Qwen3-VL-2B-Instruct"
 revision = "89644892e4d85e24eaac8bacfd4f463576704203"
-max_pixels = 2097152  # 2048 visual tokens of 32x32 pixels
+dtype = "float16"  # to be confirmed by the pilot
+image_size = { shortest_edge = 65536, longest_edge = 2097152 }  # pixels; at most 2048 visual tokens
 max_new_tokens = 4096
 prompt = "Transcribe all text visible on this document page in natural reading order. Return only the transcription, without introductory text or explanations. Do not describe the page, and do not invent text that you cannot read."

@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import argparse
+import json
 import statistics
 from collections import Counter
 from pathlib import Path
 
-from . import data, models, runner, score
+from . import data, env, models, pilot, runner, score
 from .text import PSEUDO_TOKEN
 
 
@@ -58,6 +59,20 @@ def cmd_stats(args) -> None:
             f"median {statistics.median(sizes):.0f}, p99 {sizes[int(0.99 * (len(sizes) - 1))]}, "
             f"max {sizes[-1]}, empty {sizes.count(0)}, pseudo tokens {pseudo}"
         )
+
+
+def cmd_pilot(args) -> None:
+    config = models.load_config(args.config, args.model)
+    images = data.train_images(args.data, args.images)
+    results = pilot.compare(config, images, args.dtypes, args.batch_sizes)
+    out = args.results / "pilot" / f"{args.model}.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    report = {"environment": env.describe(), "images": [p.name for p in images], "results": results}
+    out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    for image, text in zip(images, results[0].get("texts", []), strict=False):
+        print(f"--- {image.name}\n{text[:400]}")
+    if all("error" in r for r in results):
+        raise SystemExit("Every variant failed.")
 
 
 def cmd_run(args) -> None:
@@ -121,6 +136,7 @@ def main(argv: list[str] | None = None) -> int:
     functions = {
         "download": cmd_download,
         "stats": cmd_stats,
+        "pilot": cmd_pilot,
         "run": cmd_run,
         "latency": cmd_latency,
         "score": cmd_score,
@@ -133,6 +149,13 @@ def main(argv: list[str] | None = None) -> int:
         if name == "download":
             continue
         sub.add_argument("--results", type=Path, default=Path("results"))
+        if name == "pilot":
+            sub.add_argument("--model", required=True)
+            sub.add_argument("--config", type=Path, default=Path("configs/models.toml"))
+            sub.add_argument("--images", type=_positive, default=8)
+            sub.add_argument("--dtypes", nargs="*", default=[])
+            sub.add_argument("--batch-sizes", nargs="+", type=_positive, default=[1])
+            continue
         sub.add_argument("--sample", type=_positive, help="pages per category; omit for all 9,000")
         sub.add_argument("--seed", type=int, default=42)
         if name == "stats":

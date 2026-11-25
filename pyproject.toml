@@ -16,8 +16,8 @@ dependencies = []
 [project.optional-dependencies]
 data = ["huggingface-hub>=0.30"]
 tesseract = ["tesserocr>=2.7", "pillow>=10"]  # wheels bundle Tesseract 5
-ppocr = ["rapidocr>=3.10,<4", "pillow>=10"]
-doctr = ["python-doctr>=1.0", "pillow>=10"]
+ppocr = ["rapidocr>=3.10,<4", "onnxruntime>=1.20", "pillow>=10"]
+doctr = ["python-doctr>=1.0,<1.2", "pillow>=10"]  # 1.2 needs torch >= 2.11
 vlm = ["transformers>=5.0,<6", "accelerate>=1.0", "pillow>=10"]
 analysis = ["numpy", "pandas", "matplotlib"]
 verify = ["jiwer>=3.0"]  # tests compare our CER/WER with jiwer

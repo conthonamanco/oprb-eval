@@ -5,6 +5,7 @@ An adapter receives only image paths, so ground truth cannot reach a model.
 
 from __future__ import annotations
 
+import importlib
 import tomllib
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -20,22 +21,26 @@ class Prediction:
 
 
 class Model(Protocol):
+    def __init__(self, config: dict): ...
+
     def transcribe(self, image_paths: Sequence[Path]) -> list[Prediction]:
         """One prediction per image, in the same order."""
         ...
 
-
-class ConstantModel:
-    """Returns a fixed string; used for smoke tests."""
-
-    def __init__(self, config: dict):
-        self.text = config["text"]
-
-    def transcribe(self, image_paths: Sequence[Path]) -> list[Prediction]:
-        return [Prediction(self.text) for _ in image_paths]
+    def info(self) -> dict:
+        """Device, precision and size of the loaded model."""
+        ...
 
 
-ADAPTERS = {"constant": ConstantModel}
+# Adapter name -> "module:class" inside oprb_eval.adapters, imported on first use.
+ADAPTERS = {
+    "constant": "constant:ConstantModel",
+    "tesseract": "tesseract:TesseractModel",
+    "ppocr": "ppocr:PPOCRModel",
+    "doctr": "doctr_words:DoctrModel",
+    "lighton": "vlm:LightOnModel",
+    "qwen_vl": "vlm:QwenVLModel",
+}
 
 
 def load_config(path: Path, name: str) -> dict:
@@ -47,7 +52,7 @@ def load_config(path: Path, name: str) -> dict:
 
 
 def build(config: dict) -> Model:
-    adapter = config["adapter"]
-    if adapter not in ADAPTERS:
-        raise SystemExit(f"Adapter '{adapter}' is not implemented yet.")
-    return ADAPTERS[adapter](config)
+    if config["adapter"] not in ADAPTERS:
+        raise SystemExit(f"Unknown adapter '{config['adapter']}'.")
+    module, _, cls = ADAPTERS[config["adapter"]].partition(":")
+    return getattr(importlib.import_module(f".adapters.{module}", __package__), cls)(config)

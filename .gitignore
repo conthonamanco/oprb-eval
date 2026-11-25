@@ -27,6 +27,7 @@ kaggle.json
 /results/**/predictions*.jsonl
 /results/**/per_image_*.csv
 /results/smoke/
+/results/pilot/
 
 # LaTeX build files
 /report/*.aux

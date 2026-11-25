@@ -5,6 +5,7 @@ from __future__ import annotations
 import random
 import shutil
 import tarfile
+import urllib.request
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -116,6 +117,31 @@ def extract_flat(archive: Path, destination: Path, suffix: str) -> int:
                     shutil.copyfileobj(stream, out)
             count += 1
     return count
+
+
+def train_images(root: Path, count: int) -> list[Path]:
+    """The first `count` training images, streamed so the 3 GB archive is not downloaded."""
+    folder = root / "train_images"
+    folder.mkdir(parents=True, exist_ok=True)
+    have = sorted(folder.glob("*.jpg"))
+    if len(have) >= count:
+        return have[:count]
+    url = f"https://huggingface.co/datasets/{REPO_ID}/resolve/main/train/text/img.tar.gz"
+    found: list[Path] = []
+    with urllib.request.urlopen(url) as response, tarfile.open(fileobj=response, mode="r|gz") as tar:
+        for member in tar:
+            if not member.isfile() or not member.name.lower().endswith(".jpg"):
+                continue
+            stream = tar.extractfile(member)
+            if stream is None:
+                continue
+            target = folder / member.name.replace("\\", "/").rsplit("/", 1)[-1]
+            with stream, target.open("wb") as out:
+                shutil.copyfileobj(stream, out)
+            found.append(target)
+            if len(found) == count:
+                break
+    return sorted(found)
 
 
 def download(root: Path, categories=("text", "nontext")) -> None:
