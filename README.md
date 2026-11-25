@@ -12,7 +12,7 @@ Thước đo: CER, WER, Precision/Recall/F1 và thời gian suy luận.
 | LightOnOCR-2-1B | VLM chuyên OCR | Đọc cả trang một lần |
 | Qwen3-VL-2B-Instruct | VLM tổng quát | Đọc cả trang theo prompt |
 
-**Trạng thái:** đã có code cho cả 5 model và notebook chạy. Chưa chạy pilot trên T4, chưa có kết quả.
+**Trạng thái:** đã có code cho cả 5 model và notebook chạy. Đã chạy pilot hai model CPU; chưa chạy pilot trên T4, chưa có kết quả.
 
 ## Cấu trúc
 
@@ -28,7 +28,7 @@ src/oprb_eval/
   adapters/        mỗi họ model một file: tesseract, ppocr, doctr_words, vlm
   reading_order.py khử nghiêng, gom dòng, tách cột cho OCR trả về khung chữ
   preprocess.py    phóng to, khử nghiêng theo khuyến nghị chính thức của model
-  pilot.py         so các cấu hình trên ảnh train
+  pilot.py         kiểm tra kỹ thuật (lỗi, tốc độ, dtype), không đọc GT
   runner.py        suy luận (batch, shard, resume) và đo thời gian
   env.py           ghi lại GPU và phiên bản thư viện của mỗi phiên
   score.py         chấm điểm, tổng hợp
@@ -80,11 +80,13 @@ Phiên bị ngắt thì giữ lại thư mục `results/` và chạy lại đún
 
 ## Nguyên tắc
 
+- Dùng nguyên trọng số pretrained, không train hay fine-tune. Chỉ tải và dùng tập test.
 - Model chỉ nhận ảnh trong `test/*/img/`. GT chỉ được đọc khi chấm điểm và thống kê dữ liệu.
-- Không chọn prompt hay siêu tham số theo điểm trên tập test.
-- Thiếu ảnh thì từ chối chạy và chấm; ảnh lỗi bị chấm như chuỗi rỗng, không bị loại khỏi trung bình.
-- Thời gian đo riêng, từng ảnh một, trên cùng loại máy; không lấy từ lượt chạy theo batch.
-- Tiền xử lý ảnh chỉ áp dụng khi tài liệu của model khuyến nghị, và được chọn trên ảnh train.
+- Prompt và tham số lấy theo tài liệu chính thức hoặc giá trị cố định đặt trước khi chạy, không chọn theo điểm.
+- Thiếu ảnh thì từ chối chạy và chấm; ảnh lỗi bị chấm như chuỗi rỗng và được đếm riêng
+  (`n_failed`); cột `*_ok_mean` là trung bình chỉ tính ảnh thành công.
+- Thời gian đo riêng, từng ảnh một, trên cùng loại máy (phiên T4; OCR CPU không dùng GPU); không lấy từ lượt chạy theo batch.
+- Tiền xử lý ảnh chỉ áp dụng khi tài liệu của model khuyến nghị.
 - Hai VLM dùng greedy decoding; trang lặp một mẫu suốt 256 token thì dừng và được đánh dấu `truncated`.
 - PP-OCR và docTR dùng chung một cách sắp thứ tự đọc; Tesseract và VLM tự sắp.
 - Đổi cấu hình model thì phải chạy lại từ đầu; repo không cho trộn kết quả.

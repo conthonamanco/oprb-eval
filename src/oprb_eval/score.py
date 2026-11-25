@@ -30,7 +30,8 @@ def score_pages(
     """Score `pages`; returns (rows, number of pages skipped for empty ground truth).
 
     A failed page counts as an empty transcript instead of being dropped, so a model
-    cannot gain by crashing on hard pages.
+    cannot gain by crashing on hard pages. `aggregate` also reports the number of failures
+    and the means without them, which is what the sample notebook averages.
     """
     rows, empty_gt = [], 0
     for page in pages:
@@ -87,8 +88,12 @@ def aggregate(rows: list[dict], by: tuple[str, ...]) -> list[dict]:
         summary["n"] = len(members)
         summary["n_failed"] = sum(r["status"] != "ok" for r in members)
         summary["n_truncated"] = sum(r["truncated"] for r in members)
+        succeeded = [r for r in members if r["status"] == "ok"]
         for metric in ("cer", "wer", "precision", "recall", "f1"):
             summary[f"{metric}_mean"] = statistics.fmean(r[metric] for r in members)
+            summary[f"{metric}_ok_mean"] = (
+                statistics.fmean(r[metric] for r in succeeded) if succeeded else None
+            )
         summary |= bootstrap(members, ("cer", "wer", "f1"))
         summary["cer_median"] = statistics.median(r["cer"] for r in members)
         summary["wer_median"] = statistics.median(r["wer"] for r in members)

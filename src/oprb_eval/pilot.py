@@ -1,7 +1,7 @@
-"""Compare settings of one model on a few training pages.
+"""Technical check of one model on a few test images: does it run, how fast is it, and do
+numeric precisions agree.
 
-Training pages, with training ground truth, are used so that no setting is ever chosen
-by looking at the test set.
+Ground truth is never read here, so no setting can be chosen by its score.
 """
 
 from __future__ import annotations
@@ -13,10 +13,10 @@ import tomllib
 from pathlib import Path
 
 from . import env
-from .data import Page, read_gt_tokens
+from .data import Page
 from .metrics import score_page
 from .models import build
-from .text import clean_text, prediction_text, reference_text
+from .text import clean_text
 
 
 def parse_variant(text: str) -> dict:
@@ -41,22 +41,6 @@ def agreement(reference: list[str], texts: list[str]) -> float | None:
         if clean_text(r)
     ]
     return statistics.fmean(scores) if scores else None
-
-
-def accuracy(pages: list[Page], texts: list[str]) -> dict:
-    result = {}
-    for protocol in ("notebook", "normalized"):
-        scores = []
-        for page, text in zip(pages, texts, strict=True):
-            reference = reference_text(read_gt_tokens(page.gt_path), protocol)
-            if reference:
-                scores.append(score_page(reference, prediction_text(text, protocol)))
-        if scores:
-            result[protocol] = {
-                name: statistics.fmean(getattr(s, name) for s in scores)
-                for name in ("cer", "wer", "precision", "recall", "f1")
-            }
-    return result
 
 
 def run_variant(config: dict, pages: list[Page], batch_size: int) -> dict:
@@ -99,7 +83,6 @@ def compare(
             if "error" not in result:
                 first = next((r for r in results if "error" not in r), result)
                 result["agreement"] = agreement(first["texts"], result["texts"])
-                result["accuracy"] = accuracy(pages, result["texts"])
             results.append(result)
             print(summary(result), flush=True)
     return results
@@ -110,8 +93,6 @@ def summary(result: dict) -> str:
     if "error" in result:
         return f"{head} FAILED {result['error']}"
     parts = [head, f"{result['seconds_per_page']:.2f} s/page"]
-    for protocol, s in result["accuracy"].items():
-        parts.append(f"{protocol}: CER={s['cer']:.4f} WER={s['wer']:.4f} F1={s['f1']:.4f}")
     same = result["agreement"]
     parts.append(f"agreement={'n/a' if same is None else f'{same:.4f}'}")
     parts.append(f"tokens={result['mean_tokens']:.0f} (max {result['max_tokens']})")

@@ -6,7 +6,6 @@ import hashlib
 import re
 import shutil
 import tarfile
-import urllib.request
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -14,7 +13,6 @@ from pathlib import Path
 REPO_ID = "kpurkayastha/OPRB"
 GT_FIELDS = 10
 EXPECTED = {"text": 6000, "nontext": 3000}
-TRAIN_TEXT_PAGES = 17212
 DENSITY = re.compile(r"\d+p\d+pct")
 SUFFIX = {"img": ".jpg", "gt": ".txt"}
 
@@ -134,40 +132,6 @@ def extract_flat(archive: Path, destination: Path, suffix: str) -> int:
                     shutil.copyfileobj(stream, out)
             count += 1
     return count
-
-
-def _stream_members(kind: str):
-    """(stem, bytes reader) for each training file, streamed instead of downloaded."""
-    url = f"https://huggingface.co/datasets/{REPO_ID}/resolve/main/train/text/{kind}.tar.gz"
-    with urllib.request.urlopen(url) as response, tarfile.open(fileobj=response, mode="r|gz") as tar:
-        for member in tar:
-            if member.isfile() and member.name.lower().endswith(SUFFIX[kind]):
-                name = member.name.replace("\\", "/").rsplit("/", 1)[-1]
-                yield name[: -len(SUFFIX[kind])], lambda m=member: tar.extractfile(m).read()
-
-
-def train_pages(root: Path, count: int) -> list[Page]:
-    """`count` training pages with ground truth, spread evenly over the training archive."""
-    folder = root / f"train_pilot_{count}"
-    if not (folder / "done").exists():
-        wanted: set[str] = set()
-        (folder / "train" / "img").mkdir(parents=True, exist_ok=True)
-        (folder / "train" / "gt").mkdir(parents=True, exist_ok=True)
-        step = TRAIN_TEXT_PAGES // count
-        for i, (stem, read) in enumerate(_stream_members("img")):
-            if i % step == 0:
-                (folder / "train" / "img" / f"{stem}.jpg").write_bytes(read())
-                wanted.add(stem)
-                if len(wanted) == count:
-                    break
-        for stem, read in _stream_members("gt"):
-            if stem in wanted:
-                (folder / "train" / "gt" / f"{stem}.txt").write_bytes(read())
-                wanted.remove(stem)
-                if not wanted:
-                    break
-        (folder / "done").touch()
-    return collect_pages(folder, ("train",))
 
 
 def download(root: Path, categories=("text", "nontext")) -> None:

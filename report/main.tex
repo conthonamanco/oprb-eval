@@ -18,6 +18,7 @@
 % 0.4 page: results/dataset_stats_full.csv and dataset_stats_sample3000.csv; words per page;
 % what GT does and does not contain. Sampling: 3,000 of 9,000 test pages (2,000 text, 1,000
 % non-text), stratified random by type and density in the original proportions, seed 42.
+% The test set has six occlusion types; it has no Black_Scribble or Mixed pages.
 
 \section{Model Descriptions}
 % 0.5 page: family, parameters, weight size, precision, resolution, prompt, token limit.
@@ -26,7 +27,10 @@
 % 1.6 pages.
 \subsection{Setup}
 % Hardware, scoring protocols, number of pages, failures and truncations, 95% bootstrap intervals.
+% Released weights, zero-shot, settings fixed in advance, none chosen by score.
 \subsection{Quantitative results}
+% Table 1 shows both protocols side by side: `notebook` (all GT tokens) and `normalized`
+% (without ##LT...## placeholders and output markup). The analysis uses `normalized`.
 \subsection{Text-region vs. non-text-region occlusions}
 \subsection{Robustness to occlusion types}
 \subsection{Qualitative examples}

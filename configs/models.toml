@@ -1,6 +1,7 @@
 # The five evaluated models. Everything in a table is part of the run fingerprint:
 # changing a value invalidates resume for that model (see runner.py).
-# Settings are fixed before the full run and are never tuned on the test set.
+# Released weights only: nothing is trained or fine-tuned. Settings are official
+# recommendations or fixed choices, set before the full run; none is chosen by its score.
 
 [tesseract]
 adapter = "tesseract"
@@ -9,9 +10,9 @@ lang = "eng"
 tessdata_tag = "4.1.0"  # tessdata_best
 tessdata_bytes = 15400601
 psm = 3  # fully automatic page segmentation
-# Tesseract's guide asks for about 300 DPI and deskewed pages; OPRB pages are about 95 DPI.
-# Both values are chosen by the pilot on training pages.
-scale = 2
+# Tesseract's guide asks for at least 300 DPI and deskewed pages. OPRB pages are about 95 DPI,
+# and 3 is the nearest whole factor (about 285 DPI).
+scale = 3
 deskew = true
 
 [ppocrv5_mobile_en]
@@ -35,9 +36,9 @@ adapter = "lighton"
 family = "ocr-vlm"
 hf_id = "lightonai/LightOnOCR-2-1B"
 revision = "be7c41313c30e940fe5571de59e5fabc779e00c8"
-dtype = "float16"  # to be confirmed by the pilot
+dtype = "float16"  # the pilot checks that its output agrees with float32
 image_size = { longest_edge = 1540 }
-upscale_to = 1540  # the model card asks for a longest edge of 1540 pixels; to be confirmed by the pilot
+upscale_to = 1540  # the model card asks for a longest edge of 1540 pixels
 max_new_tokens = 4096
 
 [qwen3_vl_2b]
@@ -45,7 +46,7 @@ adapter = "qwen_vl"
 family = "vlm"
 hf_id = "Qwen/Qwen3-VL-2B-Instruct"
 revision = "89644892e4d85e24eaac8bacfd4f463576704203"
-dtype = "float16"  # to be confirmed by the pilot
+dtype = "float16"  # the pilot checks that its output agrees with float32
 image_size = { shortest_edge = 65536, longest_edge = 2097152 }  # pixels; at most 2048 visual tokens
 max_new_tokens = 4096
 prompt = "Transcribe all text visible on this document page in natural reading order. Return only the transcription, without introductory text or explanations. Do not describe the page, and do not invent text that you cannot read."

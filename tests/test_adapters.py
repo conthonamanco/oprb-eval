@@ -13,9 +13,9 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
 
-from oprb_eval import data, models, pilot
+from oprb_eval import models, pilot
 from oprb_eval.adapters.doctr_words import page_text
-from oprb_eval.data import Page, train_pages
+from oprb_eval.data import Page
 from oprb_eval.adapters.vlm import LOOP_WINDOW, cut_at_end, is_looping
 
 REPO = Path(__file__).resolve().parents[1]
@@ -122,14 +122,11 @@ class PilotTest(unittest.TestCase):
     config = {"adapter": "constant", "text": "The cat sat"}
 
     def setUp(self):
-        tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp.cleanup)
-        self.pages = []
-        for i, words in enumerate(("The cat sat", "The cat")):
-            gt = Path(tmp.name) / f"{i}.txt"
-            box = "\t".join(["0"] * 8)
-            gt.write_text("".join(f"{w}\t{box}\tF\tparagraph\n" for w in words.split()), encoding="utf-8")
-            self.pages.append(Page("train", str(i), Path(f"{i}.jpg"), gt, "Black_Ink", "0p5pct"))
+        # The ground-truth file does not exist: the pilot must never open it.
+        self.pages = [
+            Page("text", str(i), Path(f"{i}.jpg"), Path("no_such_gt.txt"), "Black_Ink", "0p5pct")
+            for i in range(2)
+        ]
 
     def test_variants_are_parsed(self):
         self.assertEqual(
@@ -139,11 +136,6 @@ class PilotTest(unittest.TestCase):
         self.assertEqual(pilot.parse_variant(""), {})
         with self.assertRaises(SystemExit):
             pilot.parse_variant("scale")
-
-    def test_accuracy_uses_the_training_ground_truth(self):
-        scores = pilot.accuracy(self.pages, ["the cat sat", "the cat sat"])["notebook"]
-        self.assertAlmostEqual(scores["recall"], 1.0)
-        self.assertAlmostEqual(scores["precision"], (1 + 2 / 3) / 2)
 
     def test_agreement_is_measured_against_the_first_variant(self):
         with mock.patch("builtins.print"):
@@ -163,23 +155,6 @@ class PilotTest(unittest.TestCase):
             results = pilot.compare(self.config, self.pages, ["dtype=bad", "dtype=good"], [1])
         self.assertIn("NaN", results[0]["error"])
         self.assertEqual(results[1]["agreement"], 1.0)
-
-
-class TrainPagesTest(unittest.TestCase):
-    def test_pages_are_spread_paired_and_cached(self):
-        def archive(kind):
-            for i in range(20):
-                name, box = f"Black_Ink__0p5pct__{i}", "\t".join(["0"] * 8)
-                body = b"jpg" if kind == "img" else f"w{i}\t{box}\tF\tx\n".encode()
-                yield name, lambda body=body: body
-
-        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(data, "TRAIN_TEXT_PAGES", 20):
-            with mock.patch.object(data, "_stream_members", archive):
-                pages = train_pages(Path(tmp), 4)
-            self.assertEqual(sorted(int(p.sample_id.rsplit("__", 1)[1]) for p in pages), [0, 5, 10, 15])
-            self.assertTrue(all(p.gt_path.exists() and p.occlusion_type == "Black_Ink" for p in pages))
-            with mock.patch.object(data, "_stream_members", side_effect=AssertionError("downloaded again")):
-                self.assertEqual(train_pages(Path(tmp), 4), pages)
 
 
 class PreprocessTest(unittest.TestCase):

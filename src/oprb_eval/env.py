@@ -33,6 +33,14 @@ def _command(*args: str) -> str | None:
     return result.stdout.strip() if result.returncode == 0 else None
 
 
+def _cpu_name() -> str | None:
+    try:
+        lines = Path("/proc/cpuinfo").read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return None
+    return next((x.partition(":")[2].strip() for x in lines if x.startswith("model name")), None)
+
+
 def describe() -> dict:
     packages = {}
     for name in PACKAGES:
@@ -44,6 +52,7 @@ def describe() -> dict:
     return {
         "python": platform.python_version(),
         "platform": platform.platform(),
+        "cpu": _cpu_name(),
         "cpu_count": os.cpu_count(),
         "gpus": gpus.splitlines() if gpus else [],
         "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),

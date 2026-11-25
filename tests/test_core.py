@@ -324,6 +324,9 @@ class RunnerTest(unittest.TestCase):
         self.assertAlmostEqual(total["cer_mean"], 2 / 8)
         self.assertAlmostEqual(total["cer_micro"], 2 / 8)
         self.assertEqual(total["cer_median"], 0)
+        self.assertEqual((total["cer_ok_mean"], total["f1_ok_mean"]), (0, 1))
+        failed = [r for r in rows if r["status"] != "ok"]
+        self.assertIsNone(score.aggregate(failed, ())[0]["f1_ok_mean"])
 
     def test_bootstrap_interval(self):
         values = [i / 100 for i in range(101)]
@@ -372,13 +375,18 @@ class CliTest(unittest.TestCase):
             for shard in ("0/2", "1/2"):
                 self.cli("run", *self.model, *self.config, "--shard", shard, "--batch-size", "5")
             self.assertIn("[notebook/full] n=24", self.cli("score", *self.model))
+            with mock.patch.object(data, "read_gt_tokens", side_effect=AssertionError("read GT")):
+                self.cli("pilot", *self.model, *self.config, "--images", "4")
+            report = (self.root / "results" / "pilot" / "smoke.json").read_text(encoding="utf-8")
+            self.assertLess(set(json.loads(report)["pages"]), set(listed.splitlines()))
             self.assertIn("n=4", self.cli("latency", *self.model, *self.config, "--sample", "4"))
         path = self.root / "results" / "smoke" / "summary_notebook_full_type.csv"
         with path.open(encoding="utf-8") as f:
             self.assertEqual(len(list(csv.DictReader(f))), 4)
 
     def test_incomplete_dataset_is_refused(self):
-        options = {"stats": [], "run": [*self.model, *self.config], "score": self.model}
+        model = [*self.model, *self.config]
+        options = {"stats": [], "pilot": model, "run": model, "score": self.model}
         for command, args in options.items():
             with self.assertRaisesRegex(SystemExit, "expected 6000"):
                 self.cli(command, *args)
