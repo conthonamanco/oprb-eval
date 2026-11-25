@@ -16,7 +16,12 @@ from unittest import mock
 from oprb_eval import models, pilot
 from oprb_eval.adapters.doctr_words import page_text
 from oprb_eval.data import Page
-from oprb_eval.adapters.vlm import LOOP_WINDOW, cut_at_end, is_looping
+from oprb_eval.adapters.vlm import (
+    LOOP_WINDOW,
+    cut_at_end,
+    encode_images_separately,
+    is_looping,
+)
 
 REPO = Path(__file__).resolve().parents[1]
 
@@ -50,6 +55,21 @@ class LoopTest(unittest.TestCase):
     def test_cut_at_end(self):
         self.assertEqual(cut_at_end([4, 5, 2, 0, 0], {2, 0}), ([4, 5], True))
         self.assertEqual(cut_at_end([4, 5], {2, 0}), ([4, 5], False))
+
+
+class EncodeSeparatelyTest(unittest.TestCase):
+    def test_one_image_per_call_and_features_in_order(self):
+        calls = []
+
+        def encode(pixel_values, image_sizes, **kwargs):
+            calls.append((pixel_values, image_sizes, kwargs))
+            return SimpleNamespace(pooler_output=tuple(f"{p}{s}" for p, s in zip(pixel_values, image_sizes)))
+
+        model = SimpleNamespace(get_image_features=encode)
+        encode_images_separately(model)
+        output = model.get_image_features(pixel_values=["a", "b"], image_sizes=[1, 2], return_dict=True)
+        self.assertEqual(output.pooler_output, ("a1", "b2"))
+        self.assertEqual(calls, [(["a"], [1], {"return_dict": True}), (["b"], [2], {"return_dict": True})])
 
 
 class DoctrTest(unittest.TestCase):
@@ -154,7 +174,8 @@ class PilotTest(unittest.TestCase):
         with mock.patch("builtins.print"), mock.patch.object(pilot, "build", build):
             results = pilot.compare(self.config, self.pages, ["dtype=bad", "dtype=good"], [1])
         self.assertIn("NaN", results[0]["error"])
-        self.assertEqual(results[1]["agreement"], 1.0)
+        self.assertEqual(results[1]["texts"], ["The cat sat"] * 2)
+        self.assertIsNone(results[1]["agreement"])  # the reference run failed
 
 
 class PreprocessTest(unittest.TestCase):

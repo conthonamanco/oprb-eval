@@ -33,6 +33,26 @@ def cut_at_end(tokens: Sequence[int], end_tokens: set[int]) -> tuple[list[int], 
     return list(tokens), False
 
 
+def encode_images_separately(model) -> None:
+    """Make `model.get_image_features` run the vision encoder on one image at a time.
+
+    LightOnOCR's encoder joins all images of a batch into one sequence and masks attention
+    between them, so memory grows with the square of the batch size. The result is the same.
+    """
+    encode = model.get_image_features
+
+    def get_image_features(pixel_values, image_sizes, **kwargs):
+        outputs = [
+            encode(pixel_values=pixel_values[i : i + 1], image_sizes=image_sizes[i : i + 1], **kwargs)
+            for i in range(len(image_sizes))
+        ]
+        first = outputs[0]
+        first.pooler_output = tuple(part for output in outputs for part in output.pooler_output)
+        return first
+
+    model.get_image_features = get_image_features
+
+
 class LoopGuard:
     """Stops a page that repeats itself, so it does not hold up its whole batch.
 
@@ -64,6 +84,7 @@ class _VLM:
             raise SystemExit("A CUDA GPU is required.")
         self.config = config
         self.dtype = getattr(torch, config["dtype"])
+        self.vision_dtype = getattr(torch, config.get("vision_dtype", config["dtype"]))
         self.processor, model = self._load(config, self.dtype)
         self.model = model.to("cuda").eval()
         self.processor.tokenizer.padding_side = "left"
@@ -111,7 +132,7 @@ class _VLM:
             padding=True,
             return_tensors="pt",
             images_kwargs={"size": dict(self.config["image_size"])},
-        ).to("cuda", dtype=self.dtype)
+        ).to("cuda", dtype=self.vision_dtype)
         inputs.pop("token_type_ids", None)
         prompt_length = inputs["input_ids"].shape[1]
         guard = LoopGuard(prompt_length, len(images), self.end_tokens)
@@ -136,6 +157,7 @@ class _VLM:
         return {
             "device": "cuda",
             "dtype": self.config["dtype"],
+            "vision_dtype": self.config.get("vision_dtype", self.config["dtype"]),
             "parameters": sum(t.numel() for t in tensors),
             "weights_mb": round(sum(t.numel() * t.element_size() for t in tensors) / 1e6, 1),
         }
@@ -157,6 +179,10 @@ class LightOnModel(_VLM):
         model = LightOnOcrForConditionalGeneration.from_pretrained(
             name, revision=revision, dtype=dtype, attn_implementation="sdpa"
         )
+        # In float16 the encoder gave NaN on every page.
+        model.model.vision_encoder.to(self.vision_dtype)
+        model.model.vision_projection.to(self.vision_dtype)
+        encode_images_separately(model.model)
         return processor, model
 
 

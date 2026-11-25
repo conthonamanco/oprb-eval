@@ -36,7 +36,8 @@ adapter = "lighton"
 family = "ocr-vlm"
 hf_id = "lightonai/LightOnOCR-2-1B"
 revision = "be7c41313c30e940fe5571de59e5fabc779e00c8"
-dtype = "float16"  # the pilot checks that its output agrees with float32
+dtype = "float16"  # language model; the pilot checks that its output agrees with float32
+vision_dtype = "float32"  # with everything in float16 the output was NaN on a T4
 image_size = { longest_edge = 1540 }
 upscale_to = 1540  # the model card asks for a longest edge of 1540 pixels
 max_new_tokens = 4096

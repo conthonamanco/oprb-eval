@@ -81,8 +81,11 @@ def compare(
             gc.collect()
             env.release_vram()
             if "error" not in result:
-                first = next((r for r in results if "error" not in r), result)
-                result["agreement"] = agreement(first["texts"], result["texts"])
+                # The first run is the reference; if it failed there is nothing to agree with.
+                first = results[0] if results else result
+                result["agreement"] = (
+                    None if "error" in first else agreement(first["texts"], result["texts"])
+                )
             results.append(result)
             print(summary(result), flush=True)
     return results
