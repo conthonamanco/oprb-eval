@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oprb-eval"
+version = "0.1.0"
+description = "Benchmark of five lightweight OCR and vision-language models on occluded document images (OPRB test set)"
+readme = "README.md"
+requires-python = ">=3.11"
+# The core (data, metrics, runner, scoring) uses only the standard library.
+dependencies = []
+
+# torch is deliberately absent: Kaggle and Colab preinstall a build that matches
+# their CUDA driver, and reinstalling it from PyPI can break that.
+[project.optional-dependencies]
+data = ["huggingface-hub>=0.30"]
+tesseract = ["tesserocr>=2.7", "pillow>=10"]  # wheels bundle Tesseract 5
+ppocr = ["rapidocr>=3.10,<4", "pillow>=10"]
+doctr = ["python-doctr>=1.0", "pillow>=10"]
+vlm = ["transformers>=5.0,<6", "accelerate>=1.0", "pillow>=10"]
+analysis = ["numpy", "pandas", "matplotlib"]
+verify = ["jiwer>=3.0"]  # tests compare our CER/WER with jiwer
+
+[tool.setuptools.packages.find]
+where = ["src"]

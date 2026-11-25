@@ -1,0 +1,5 @@
+# Checks the pipeline on any machine, without a real model.
+[smoke]
+adapter = "constant"
+family = "test"
+text = "constant prediction"

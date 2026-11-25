@@ -1,0 +1,39 @@
+# Internal documents: assignment brief, sample notebook, analysis, plan. Never push.
+/internal/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+/build/
+/dist/
+.venv/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Secrets
+.env
+kaggle.json
+
+# Data and model weights
+/data/
+*.safetensors
+*.onnx
+*.traineddata
+*.tar.gz
+*.zip
+
+# Raw outputs are large and contain page text; only summaries are committed
+/results/**/predictions*.jsonl
+/results/**/per_image_*.csv
+/results/smoke/
+
+# LaTeX build files
+/report/*.aux
+/report/*.bbl
+/report/*.blg
+/report/*.fdb_latexmk
+/report/*.fls
+/report/*.log
+/report/*.out
+/report/*.synctex.gz
