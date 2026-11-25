@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 import shutil
 import tarfile
 import urllib.request
@@ -11,8 +12,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 REPO_ID = "kpurkayastha/OPRB"
+GT_FIELDS = 10
 EXPECTED = {"text": 6000, "nontext": 3000}
 TRAIN_TEXT_PAGES = 17212
+DENSITY = re.compile(r"\d+p\d+pct")
 SUFFIX = {"img": ".jpg", "gt": ".txt"}
 
 
@@ -32,20 +35,26 @@ class Page:
 
 
 def parse_stem(stem: str) -> tuple[str, str]:
-    """`White_Whitener__2p0pct__105.tar_...` -> ("White_Whitener", "2p0pct")."""
-    parts = stem.split("__", 2)
-    if len(parts) < 3:
-        return parts[0], "unknown"
-    return parts[0], parts[1]
+    """`White_Whitener__2p0pct__105.tar_...` -> ("White_Whitener", "2p0pct").
+
+    `Sim` and `Through_Stamp` names carry no density, and paper names may contain `__`.
+    """
+    kind, _, rest = stem.partition("__")
+    density = rest.split("__", 1)[0]
+    return kind, density if DENSITY.fullmatch(density) else "none"
 
 
 def read_gt_tokens(path: Path) -> list[str]:
-    """Token column of a GT file, in file order (same rule as the sample notebook)."""
+    """Token column of a GT file, in file order.
+
+    Rows follow DocBank: token, x0, y0, x1, y1, R, G, B, font, category. The sample notebook
+    expects 11 or more fields, which no row of the released test set has.
+    """
     tokens = []
     with open(path, encoding="utf-8-sig", errors="replace") as f:
         for line in f:
             fields = line.rstrip("\r\n").split("\t")
-            if len(fields) >= 11 and fields[0].strip():
+            if len(fields) >= GT_FIELDS and fields[0].strip():
                 tokens.append(fields[0].strip())
     return tokens
 

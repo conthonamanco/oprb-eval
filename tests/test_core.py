@@ -18,7 +18,7 @@ from oprb_eval.models import Prediction
 from oprb_eval.text import clean_text, prediction_text, reference_text
 
 REPO = Path(__file__).resolve().parents[1]
-BOX = "\t".join(["0"] * 8)
+BOX = "\t".join(["0"] * 7)  # x0 y0 x1 y1 R G B
 
 
 def naive_distance(a, b):
@@ -140,13 +140,22 @@ class DataTest(unittest.TestCase):
             data.parse_stem("White_Whitener__2p0pct__105.tar_1804.06143.gz_MassiveMIMO_10_ori"),
             ("White_Whitener", "2p0pct"),
         )
-        self.assertEqual(data.parse_stem("odd-name"), ("odd-name", "unknown"))
+        self.assertEqual(data.parse_stem("odd-name"), ("odd-name", "none"))
+        for stem in ("Sim__11.tar_1_2", "Sim__11.tar_1801.04461.gz_Size__2_ori"):
+            self.assertEqual(data.parse_stem(stem), ("Sim", "none"))
 
     def test_read_gt_skips_malformed_rows_and_keeps_quotes(self):
         path = self.root / "a.txt"
         rows = [f'﻿"Hi\t{BOX}\tF\tparagraph', "short\trow", f"\t{BOX}\tF\tx", f"you\t{BOX}\tF\tx"]
         path.write_text("\n".join(rows) + "\n", encoding="utf-8")
         self.assertEqual(data.read_gt_tokens(path), ['"Hi', "you"])
+
+    def test_read_gt_accepts_a_row_of_the_released_test_set(self):
+        path = self.root / "a.txt"
+        path.write_text(
+            "In\t233\t164\t248\t180\t0\t0\t0\tGJAZDJ+NimbusRomNo9L-Regu\tparagraph\n", encoding="utf-8"
+        )
+        self.assertEqual(data.read_gt_tokens(path), ["In"])
 
     def test_unpaired_files_are_an_error(self):
         make_dataset(self.root, 1)

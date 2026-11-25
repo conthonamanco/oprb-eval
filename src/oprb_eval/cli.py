@@ -131,6 +131,8 @@ def cmd_score(args) -> None:
     tag = _tag(args)
     for protocol in score.PROTOCOLS:
         rows, empty_gt = score.score_pages(pages, predictions, protocol)
+        if not rows:
+            raise SystemExit("Every page has empty ground truth, so there is nothing to score.")
         score.write_csv(out / f"per_image_{protocol}_{tag}.csv", rows)
         for name, by in score.GROUPINGS.items():
             score.write_csv(out / f"summary_{protocol}_{tag}_{name}.csv", score.aggregate(rows, by))
