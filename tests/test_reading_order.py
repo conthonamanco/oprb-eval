@@ -2,7 +2,7 @@ import math
 import random
 import unittest
 
-from oprb_eval.reading_order import page_angle, to_text
+from oprb_eval.reading_order import column_count, page_angle, to_text
 
 HEIGHT, LINE, CHAR, SPACE = 12, 18, 7, 5
 
@@ -62,6 +62,22 @@ class ReadingOrderTest(unittest.TestCase):
             return items + words_at(375, 120 + LINE * 33, "17", level)
 
         self.check(build, " ".join([title, *left, *right, "17"]))
+
+    def test_tall_line_boxes_do_not_join_across_a_narrow_gutter(self):
+        # PP-OCR pads its line boxes: 22 px tall on lines 24 px apart, with a 20 px gutter,
+        # less than JOIN_GAP line heights. File order of the GT looks like this as well.
+        left, right = paragraph("l", 30), paragraph("r", 30)
+        items = []
+        for i in range(30):
+            y = 100 + 24 * i
+            items.append((left[i], [(60, y), (360, y), (360, y + 22), (60, y + 22)]))
+            items.append((right[i], [(380, y), (680, y), (680, y + 22), (380, y + 22)]))
+        for degrees in (-3, 0, 4):
+            with self.subTest(degrees=degrees):
+                self.assertEqual(render(items, degrees).split(), " ".join([*left, *right]).split())
+        quads = [q for _, q in items]
+        self.assertEqual(column_count([t for t, _ in items], quads), 2)
+        self.assertEqual(column_count(left, [q for q in quads if q[0][0] == 60]), 1)
 
     def test_equation_number_stays_on_its_line(self):
         lines = paragraph("p", 12)

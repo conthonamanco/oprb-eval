@@ -17,6 +17,7 @@ Point = tuple[float, float]
 JOIN_GAP = 1.2  # largest gap inside a line, in line heights
 MIN_OVERLAP = 0.5  # vertical overlap that puts two boxes on the same line
 GUTTER = 0.012  # width of the empty strip between columns, relative to the text width
+CLEAR_ROWS = 0.6  # share of rows that must leave that strip empty before lines may not cross it
 
 
 @dataclass
@@ -79,8 +80,47 @@ def _same_line(a: Box, b: Box) -> bool:
     return overlap >= MIN_OVERLAP * min(a.height, b.height)
 
 
-def _join_fragments(boxes: list[Box]) -> list[Box]:
-    """Chain each box to its nearest right-hand neighbour on the same line."""
+def _clear_strip(boxes: list[Box]) -> float | None:
+    """Centre of an empty vertical strip that separates two columns, found on raw boxes.
+
+    A row counts as clear at x when it has text on both sides of the strip and no box inside
+    it. Word boxes of a single column almost never leave the strip empty, so most rows are
+    blocked; in a two-column page most rows are clear. Joining boxes into lines must not
+    cross this strip: tall line boxes (PP-OCR pads them) would otherwise join the two
+    columns, because the gutter is narrower than JOIN_GAP line heights on 95-DPI pages.
+    """
+    left, right = min(b.x0 for b in boxes), max(b.x1 for b in boxes)
+    width = right - left
+    if width <= 0:
+        return None
+    size = statistics.median(b.height for b in boxes) or 1.0
+    # At least half a text height wide, so that the space between two words never holds it
+    half = max(GUTTER * width, size / 2) / 2
+    rows: dict[int, list[Box]] = {}
+    for box in boxes:
+        rows.setdefault(int(box.cy // size), []).append(box)
+    best = None
+    for step in range(81):  # the middle 40% of the text width, as in _find_gutter
+        x = left + width * (0.30 + 0.40 * step / 80)
+        clear = blocked = 0
+        for row in rows.values():
+            if any(b.x0 <= x + half and b.x1 >= x - half for b in row):  # touching blocks too
+                blocked += 1
+            elif any(b.x1 < x - half for b in row) and any(b.x0 > x + half for b in row):
+                clear += 1
+        if clear + blocked:
+            candidate = (-clear / (clear + blocked), abs(x - (left + right) / 2), x)
+            best = min(best, candidate) if best else candidate
+    if best is None or -best[0] < CLEAR_ROWS:
+        return None
+    return best[2]
+
+
+def _join_fragments(boxes: list[Box], barrier: float | None = None) -> list[Box]:
+    """Chain each box to its nearest right-hand neighbour on the same line.
+
+    No link crosses `barrier`, the x of a column gutter found by `_clear_strip`.
+    """
     size = statistics.median(b.height for b in boxes) or 1.0
     bins: dict[int, list[int]] = {}
     for i, box in enumerate(boxes):
@@ -94,7 +134,8 @@ def _join_fragments(boxes: list[Box]) -> list[Box]:
             other = boxes[j]
             gap = other.x0 - box.x1
             limit = JOIN_GAP * min(box.height, other.height)
-            if other.x0 > box.cx and gap <= limit and _same_line(box, other):
+            crosses = barrier is not None and box.x1 <= barrier <= other.x0
+            if other.x0 > box.cx and gap <= limit and not crosses and _same_line(box, other):
                 links.append((gap, i, j))
     following: dict[int, int] = {}
     preceded: set[int] = set()
@@ -157,7 +198,8 @@ def _fragments(texts: Sequence[str], quads: Sequence[Sequence[Point]]) -> list[B
     kept = [(t.strip(), q) for t, q in zip(texts, quads, strict=True) if t.strip()]
     if not kept:
         return []
-    return _join_fragments(_deskew([t for t, _ in kept], [q for _, q in kept]))
+    boxes = _deskew([t for t, _ in kept], [q for _, q in kept])
+    return _join_fragments(boxes, _clear_strip(boxes))
 
 
 def column_count(texts: Sequence[str], quads: Sequence[Sequence[Point]]) -> int:
