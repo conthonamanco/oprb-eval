@@ -9,15 +9,16 @@ from collections import defaultdict
 from dataclasses import asdict
 from pathlib import Path
 
-from .data import Page, read_gt_tokens
+from .data import Page, read_gt
 from .metrics import score_page
-from .text import prediction_text, reference_text
+from .text import column_count, prediction_text, reference_text
 
-PROTOCOLS = ("notebook", "normalized")
+PROTOCOLS = ("notebook", "normalized", "columns")
 RESAMPLES = 1000
 GROUPINGS = {
     "overall": (),
     "category": ("category",),
+    "layout": ("category", "layout"),
     "type": ("category", "occlusion_type"),
     "density": ("category", "density"),
     "type_density": ("category", "occlusion_type", "density"),
@@ -35,7 +36,8 @@ def score_pages(
     """
     rows, empty_gt = [], 0
     for page in pages:
-        reference = reference_text(read_gt_tokens(page.gt_path), protocol)
+        gt = read_gt(page.gt_path)
+        reference = reference_text(gt, protocol)
         if not reference:
             empty_gt += 1
             continue
@@ -48,6 +50,7 @@ def score_pages(
                 "category": page.category,
                 "occlusion_type": page.occlusion_type,
                 "density": page.density,
+                "layout": f"{column_count(gt)}col",
                 "status": record["status"],
                 "truncated": ok and record["truncated"],
                 **asdict(score_page(reference, hypothesis)),

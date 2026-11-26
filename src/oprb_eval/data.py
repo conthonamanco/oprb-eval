@@ -42,19 +42,38 @@ def parse_stem(stem: str) -> tuple[str, str]:
     return kind, density if DENSITY.fullmatch(density) else "none"
 
 
-def read_gt_tokens(path: Path) -> list[str]:
-    """Token column of a GT file, in file order.
+@dataclass(frozen=True)
+class GTToken:
+    text: str
+    x0: float
+    y0: float
+    x1: float
+    y1: float
+
+
+def read_gt(path: Path) -> list[GTToken]:
+    """Rows of a GT file, in file order.
 
     Rows follow DocBank: token, x0, y0, x1, y1, R, G, B, font, category. The sample notebook
-    expects 11 or more fields, which no row of the released test set has.
+    expects 11 or more fields, which no row of the released test set has. File order runs
+    along a whole printed line, so on a two-column page it alternates between the columns.
     """
     tokens = []
     with open(path, encoding="utf-8-sig", errors="replace") as f:
         for line in f:
             fields = line.rstrip("\r\n").split("\t")
             if len(fields) >= GT_FIELDS and fields[0].strip():
-                tokens.append(fields[0].strip())
+                try:
+                    box = tuple(float(v) for v in fields[1:5])
+                except ValueError:
+                    box = (0.0, 0.0, 0.0, 0.0)
+                tokens.append(GTToken(fields[0].strip(), *box))
     return tokens
+
+
+def read_gt_tokens(path: Path) -> list[str]:
+    """Token column of a GT file, in file order."""
+    return [token.text for token in read_gt(path)]
 
 
 def collect_pages(root: Path, categories=("text", "nontext")) -> list[Page]:

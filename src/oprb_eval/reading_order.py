@@ -153,12 +153,26 @@ def _rows(fragments: list[Box]) -> list[str]:
     return [" ".join(f.text for f in sorted(row, key=lambda f: f.x0)) for row in rows]
 
 
-def to_text(texts: Sequence[str], quads: Sequence[Sequence[Point]]) -> str:
-    """`quads[i]` holds the four corners of `texts[i]`, in pixels and in cyclic order."""
+def _fragments(texts: Sequence[str], quads: Sequence[Sequence[Point]]) -> list[Box]:
     kept = [(t.strip(), q) for t, q in zip(texts, quads, strict=True) if t.strip()]
     if not kept:
+        return []
+    return _join_fragments(_deskew([t for t, _ in kept], [q for _, q in kept]))
+
+
+def column_count(texts: Sequence[str], quads: Sequence[Sequence[Point]]) -> int:
+    """1 or 2, by the same gutter test that `to_text` uses; 0 for an empty page."""
+    fragments = _fragments(texts, quads)
+    if not fragments:
+        return 0
+    return 1 if _find_gutter(fragments) is None else 2
+
+
+def to_text(texts: Sequence[str], quads: Sequence[Sequence[Point]]) -> str:
+    """`quads[i]` holds the four corners of `texts[i]`, in pixels and in cyclic order."""
+    fragments = _fragments(texts, quads)
+    if not fragments:
         return ""
-    fragments = _join_fragments(_deskew([t for t, _ in kept], [q for _, q in kept]))
     gutter = _find_gutter(fragments)
     if gutter is None:
         return "\n".join(_rows(fragments))

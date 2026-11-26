@@ -22,7 +22,7 @@ configs/
   smoke.toml       model giả để thử pipeline
 src/oprb_eval/
   data.py          tải, ghép cặp, đọc GT, lấy mẫu phân tầng
-  text.py          chuẩn hóa văn bản, hai giao thức notebook / normalized
+  text.py          chuẩn hóa văn bản, ba giao thức notebook / normalized / columns
   metrics.py       CER, WER, P/R/F1
   models.py        giao diện model và danh sách adapter
   adapters/        mỗi họ model một file: tesseract, ppocr, doctr_words, vlm
@@ -90,3 +90,18 @@ Phiên bị ngắt thì giữ lại thư mục `results/` và chạy lại đún
 - Hai VLM dùng greedy decoding; trang lặp một mẫu suốt 256 token thì dừng và được đánh dấu `truncated`.
 - PP-OCR và docTR dùng chung một cách sắp thứ tự đọc; Tesseract và VLM tự sắp.
 - Đổi cấu hình model thì phải chạy lại từ đầu; repo không cho trộn kết quả.
+
+## Ba giao thức chấm
+
+| Giao thức | GT | Dự đoán |
+|---|---|---|
+| `notebook` | token theo thứ tự file, như notebook mẫu | chỉ chuẩn hóa (NFKC, khoảng trắng, chữ thường) |
+| `normalized` | bỏ token `##LT…##` | bỏ thêm Markdown, HTML và LaTeX |
+| `columns` | như `normalized`, đọc lại theo từng cột từ tọa độ khung chữ | như `normalized` |
+
+Thứ tự trong file GT chạy ngang hết một dòng in, nên ở trang hai cột nó xen kẽ hai cột. Model đọc hết cột trái
+rồi mới sang cột phải bị CER/WER cao dù đúng từng chữ. P/R/F1 không phụ thuộc thứ tự nên giống nhau ở
+`normalized` và `columns`. `columns` dùng chung code sắp thứ tự với PP-OCR và docTR, nên có thể hơi có lợi cho hai model đó.
+Mọi bảng có thêm cột `layout` (`1col`/`2col`, phát hiện từ khung chữ của GT).
+
+Chấm lại không cần GPU: trên Kaggle chọn `STAGE = "score"`, không bật GPU, Add Input → Notebook Output của phiên `run`.

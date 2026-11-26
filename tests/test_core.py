@@ -15,7 +15,7 @@ from unittest import mock
 from oprb_eval import cli, data, runner, score
 from oprb_eval.metrics import edit_distance, score_page
 from oprb_eval.models import Prediction
-from oprb_eval.text import clean_text, prediction_text, reference_text
+from oprb_eval.text import clean_text, column_count, prediction_text, reference_text
 
 REPO = Path(__file__).resolve().parents[1]
 BOX = "\t".join(["0"] * 7)  # x0 y0 x1 y1 R G B
@@ -123,6 +123,38 @@ class TextTest(unittest.TestCase):
         raw = "# Title\n\n**bold** text\n| a | b |\n|---|---|\n![fig](x.png)\n<td>cell</td> x &lt; y"
         self.assertEqual(prediction_text(raw, "normalized"), "title bold text | a | b | cell x < y")
         self.assertIn("# title", prediction_text(raw, "notebook"))
+
+    def test_latex_removed_only_in_normalized(self):
+        raw = r"for $k' > k$, $L_{k'} \geq L_k$ and \(\alpha \times 2\) \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}"
+        self.assertEqual(
+            prediction_text(raw, "normalized"), "for k' > k, lk' \u2265 lk and \u03b1 \u00d7 2 1 0 0 1"
+        )
+        self.assertEqual(prediction_text(raw, "columns"), prediction_text(raw, "normalized"))
+        self.assertIn(r"\geq", prediction_text(raw, "notebook"))
+        # OCR output without LaTeX keeps braces and underscores
+        self.assertEqual(prediction_text("f_{x} = my_var", "normalized"), "f_{x} = my_var")
+
+    def test_columns_reads_one_column_then_the_other(self):
+        def line(y, x, words):
+            out = []
+            for w in words.split():
+                out.append(data.GTToken(w, x, y, x + 8 * len(w), y + 10))
+                x += 8 * len(w) + 5
+            return out
+
+        gt = [data.GTToken("##LTLine##", 0, 0, 1, 1)]
+        for i in range(12):  # DocBank order: left half, then right half of the same line
+            gt += line(20 * i, 60, f"left{i} alpha beta gamma") + line(20 * i, 520, f"right{i} delta epsilon")
+        self.assertEqual(column_count(gt), 2)
+        tokens = reference_text(gt, "columns").split()
+        self.assertEqual(tokens[:5], ["left0", "alpha", "beta", "gamma", "left1"])
+        self.assertLess(tokens.index("left11"), tokens.index("right0"))
+        self.assertEqual(sorted(tokens), sorted(reference_text(gt, "normalized").split()))
+        self.assertEqual(reference_text(gt, "normalized").split()[4], "right0")
+        single = [t for t in gt if not t.text.startswith(("right", "delta", "epsilon"))]
+        self.assertEqual(column_count(single), 1)
+        with self.assertRaises(TypeError):
+            reference_text(["a", "b"], "columns")
 
     def test_maths_is_not_treated_as_a_tag(self):
         text = "a < b and c > d, 2 * 3"
@@ -375,11 +407,15 @@ class CliTest(unittest.TestCase):
             for shard in ("0/2", "1/2"):
                 self.cli("run", *self.model, *self.config, "--shard", shard, "--batch-size", "5")
             self.assertIn("[notebook/full] n=24", self.cli("score", *self.model))
-            with mock.patch.object(data, "read_gt_tokens", side_effect=AssertionError("read GT")):
+            with mock.patch.object(data, "read_gt", side_effect=AssertionError("read GT")):
                 self.cli("pilot", *self.model, *self.config, "--images", "4")
             report = (self.root / "results" / "pilot" / "smoke.json").read_text(encoding="utf-8")
             self.assertLess(set(json.loads(report)["pages"]), set(listed.splitlines()))
             self.assertIn("n=4", self.cli("latency", *self.model, *self.config, "--sample", "4"))
+        for protocol in ("notebook", "normalized", "columns"):
+            path = self.root / "results" / "smoke" / f"summary_{protocol}_full_layout.csv"
+            with path.open(encoding="utf-8") as f:
+                self.assertTrue(all(r["layout"].endswith("col") for r in csv.DictReader(f)))
         path = self.root / "results" / "smoke" / "summary_notebook_full_type.csv"
         with path.open(encoding="utf-8") as f:
             self.assertEqual(len(list(csv.DictReader(f))), 4)
