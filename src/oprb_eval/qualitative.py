@@ -114,21 +114,28 @@ def choose_window(candidates: list[dict], rule: str, model: str) -> dict:
     return max(candidates, key=lambda c: c["models"][model]["word_errors"])
 
 
-def box_scale(box_max: float, width: int, height: int) -> float:
-    """DocBank stores boxes on a 0-1000 scale; scale them to the image if that is the case."""
-    return max(width, height) / 1000 if box_max <= 1000 < max(width, height) else 1.0
+def box_scale(box_max: float, width: int, height: int) -> tuple[float, float]:
+    """DocBank stores boxes on a 0-1000 scale per axis (x by width, y by height); scale them
+    to the image if that is the case."""
+    if box_max <= 1000 < max(width, height):
+        return width / 1000, height / 1000
+    return 1.0, 1.0
 
 
-def save_images(page: Page, box: list[float], out: Path, stem: str) -> dict:
-    """Crop of the excerpt and a page thumbnail with the excerpt outlined."""
+def save_images(page: Page, box: list[float], out: Path, stem: str) -> dict | None:
+    """Crop of the excerpt and a page thumbnail with the excerpt outlined. None if the box
+    does not fall inside the image."""
     from PIL import Image, ImageDraw
 
     with Image.open(page.image_path) as image:
         image = image.convert("RGB")
-    scale = box_scale(max(box), *image.size)
-    x0, y0, x1, y1 = (v * scale for v in box)
+    sx, sy = box_scale(max(box), *image.size)
+    x0, y0, x1, y1 = box[0] * sx, box[1] * sy, box[2] * sx, box[3] * sy
     crop = (max(0, int(x0 - CROP_MARGIN)), max(0, int(y0 - CROP_MARGIN)),
             min(image.width, int(x1 + CROP_MARGIN)), min(image.height, int(y1 + CROP_MARGIN)))
+    if crop[2] <= crop[0] or crop[3] <= crop[1]:
+        return None
+    scale = [sx, sy]
     image.crop(crop).save(out / f"{stem}_crop.png")
     thumbnail = image.copy()
     ImageDraw.Draw(thumbnail).rectangle(crop, outline=(227, 73, 72), width=6)
@@ -164,7 +171,11 @@ def build(picks: list[dict], pages: dict[str, Page], predictions: dict[str, dict
         if candidates:
             example["excerpt"] = choose_window(candidates, pick["rule"], pick["model"])
             if images:
-                example["images"] = save_images(page, example["excerpt"]["box"], out, f"{i:02d}_{pick['rule']}")
+                saved = save_images(page, example["excerpt"]["box"], out, f"{i:02d}_{pick['rule']}")
+                if saved:
+                    example["images"] = saved
+                else:
+                    print(f"{page.key}: excerpt box {example['excerpt']['box']} is outside the image, no crop")
         if pick["rule"] in ("most_extra_words", "most_missing_words") and pick["model"] in outputs:
             words = outputs[pick["model"]]
             example["output_tail" if pick["rule"] == "most_extra_words" else "output_head"] = (

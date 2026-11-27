@@ -68,9 +68,9 @@ class SpanTests(unittest.TestCase):
         self.assertEqual(qualitative.best_span(["a", "b"], []), (0, 0, 2))
 
     def test_box_scale(self):
-        self.assertEqual(qualitative.box_scale(990, 1700, 2200), 2.2)
-        self.assertEqual(qualitative.box_scale(1500, 1700, 2200), 1.0)
-        self.assertEqual(qualitative.box_scale(900, 800, 1000), 1.0)
+        self.assertEqual(qualitative.box_scale(990, 1700, 2200), (1.7, 2.2))
+        self.assertEqual(qualitative.box_scale(1500, 1700, 2200), (1.0, 1.0))
+        self.assertEqual(qualitative.box_scale(900, 800, 1000), (1.0, 1.0))
 
 
 class BuildTests(unittest.TestCase):
