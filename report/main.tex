@@ -3,7 +3,7 @@
 \usepackage[margin=2cm]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage[T5,T1]{fontenc}
-\usepackage{booktabs,graphicx,hyperref}
+\usepackage{booktabs,graphicx,tabularx,hyperref}
 \title{Evaluating Lightweight Vision-Language and OCR Models\\on Occluded Document Images}
 \author{TODO}
 \date{}
@@ -12,16 +12,93 @@
 \maketitle
 
 \section{Introduction}
-% 0.25 page: problem, three questions (accuracy, robustness, efficiency), contribution.
+Real documents carry ink marks, stamps, dust and correction fluid that hide part of the text.
+We ask how well \emph{lightweight} text recognisers read such pages, and at what cost:
+(i)~which model transcribes occluded pages most accurately,
+(ii)~which occlusions hurt most, and which model degrades least, and
+(iii)~how accuracy trades off against model size and inference time.
+We compare three OCR pipelines and two vision-language models (VLMs), ordered from reading only what is
+visible to predicting text from a language prior. All run zero-shot with their pretrained weights:
+nothing is trained or fine-tuned, and every setting comes from the model's documentation, fixed before
+the full run. Each model reads the same 3{,}000 test pages of OPRB~\cite{oprb}. We score every transcript
+under three protocols that separate reading errors from output format and reading order, and compare
+models page by page with bootstrap confidence intervals.
 
 \section{Dataset Statistics}
-% 0.4 page: results/dataset_stats_full.csv and dataset_stats_sample3000.csv; words per page;
-% what GT does and does not contain. Sampling: 3,000 of 9,000 test pages (2,000 text, 1,000
-% non-text), stratified random by type and density in the original proportions, seed 42.
-% The test set has six occlusion types; it has no Black_Scribble or Mixed pages.
+OPRB~\cite{oprb} draws synthetic occlusions on English arXiv pages from DocBank and rotates every page by up
+to $\pm5^\circ$. Its test set has 6{,}000 pages occluded on text regions (\texttt{text}) and 3{,}000 on
+non-text regions (\texttt{nontext}). Models see only the image; the ground truth (GT), one token per line
+with its box, colour, font and layout class, is read only for scoring. Five models on 9{,}000 pages exceed
+our GPU budget, so we draw 3{,}000 pages at random (seed 42), stratified by region, occlusion type and
+density in the original proportions (Table~\ref{tab:data}); a sample mean thus estimates the test-set mean
+without weights. All models read the same pages.
+
+\begin{table}[h]
+\centering\small
+\caption{Pages per occlusion type in the test set and in our sample. Black Ink, White Whitener,
+White Burnt and Through Dust come in three densities (0.5\,\%, 1\,\%, 2\,\% of the page, in roughly
+equal shares); Sim and Through Stamp have no density level.}
+\label{tab:data}
+\begin{tabular}{@{}llrrrrrrr@{}}
+\toprule
+Region & Pages & \shortstack[r]{Black\\Ink} & \shortstack[r]{White\\Whitener} & \shortstack[r]{White\\Burnt}
+  & \shortstack[r]{Through\\Dust} & \shortstack[r]{Through\\Stamp} & Sim & Total \\
+\midrule
+\texttt{text}    & test set & 1{,}000 & 1{,}000 & 1{,}000 & 1{,}000 & 1{,}000 & 1{,}000 & 6{,}000 \\
+                 & sample   & 334 & 333 & 333 & 334 & 333 & 333 & 2{,}000 \\
+\texttt{nontext} & test set & 537 & 537 & 537 & 537 & 429 & 423 & 3{,}000 \\
+                 & sample   & 178 & 179 & 180 & 178 & 143 & 142 & 1{,}000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{What the ground truth contains.} Several properties of the GT shape how scores should be read.
+First, DocBank marks lines and figures with placeholder tokens (\texttt{\#\#LTLine\#\#},
+\texttt{\#\#LTFigure\#\#}) that no model can read from the image. In the test set they are 1.5\,\% of GT
+tokens on \texttt{text} pages but 45\,\% on \texttt{nontext} pages, where one page holds 137{,}800. Without
+them, a sampled page has a median of 516 words (\texttt{text}) and 455 words (\texttt{nontext}).
+Second, the GT lists tokens along a whole printed line, so on a two-column page it alternates between
+the columns. Two-column pages make up 17\,\% of \texttt{text} but 44\,\% of \texttt{nontext} pages in
+the sample, so the two regions differ in layout as well as in where the occlusion falls. Third,
+according to the dataset card the GT describes the clean page, so text hidden under an occlusion still
+counts and the task is full-page recovery. A few pages have almost no text after removing placeholders
+(3 of 3{,}000 under 10 characters), which makes their per-page CER unbounded; we therefore also report
+median and micro-averaged CER. The test set contains six occlusion types; it has no \textit{Black Scribble}
+or \textit{Mixed} pages, so scribbles are not covered.
 
 \section{Model Descriptions}
-% 0.5 page: family, parameters, weight size, precision, resolution, prompt, token limit.
+Table~\ref{tab:models} lists the five models. We chose them so that each step from top to bottom relies
+less on what is visible and more on a language prior, which lets the results explain \emph{why} a model
+is or is not robust.
+
+\begin{table}[h]
+\centering\small
+\caption{Evaluated models (released weights, pinned versions). Parameters and weight sizes as loaded.
+VLMs decode greedily with at most 4{,}096 new tokens; a page that repeats one pattern for its last 256
+tokens is stopped and marked \emph{truncated}.}
+\label{tab:models}
+\begin{tabularx}{\textwidth}{@{}llrrX@{}}
+\toprule
+Model & Recognition & Params & Weights & Hardware and settings \\
+\midrule
+Tesseract 5.5 (\texttt{tessdata\_best}) & LSTM per line & -- & 15\,MB & CPU; $3\times$ upscale, deskew; automatic layout \\
+PP-OCRv5 mobile (English) & detector + CTC per line & -- & 13\,MB & CPU (ONNX); shared reading order \\
+docTR FAST-base + PARSeq & detector + AR decoder per word & 34\,M & 138\,MB & T4, fp32; rotated boxes; shared reading order \\
+LightOnOCR-2-1B & VLM for OCR & 1.0\,B & 2.8\,GB & T4; fp16 LM, fp32 vision encoder; long edge 1{,}540\,px; no prompt \\
+Qwen3-VL-2B-Instruct & general VLM & 2.1\,B & 4.3\,GB & T4, fp16; at most 2{,}048 visual tokens; transcription prompt \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Tesseract~5} is the classical CPU baseline. Its guide asks for at least 300\,DPI and deskewed pages;
+OPRB pages are about 95\,DPI, so we upscale by 3 and deskew. \textbf{PP-OCRv5 mobile} is a very small deep
+pipeline whose CTC recogniser reads each detected line from its pixels alone. \textbf{docTR} pairs the
+FAST-base detector with PARSeq, whose autoregressive decoder adds context within a word. For both detector
+pipelines one shared routine deskews the boxes, groups them into lines, splits columns and orders them.
+\textbf{LightOnOCR-2-1B} is trained end to end for page OCR and writes Markdown, with LaTeX for formulas; its
+card asks for a 1{,}540\,px longest edge. In fp16 its vision encoder produced NaN on a T4, so the encoder runs
+in fp32. \textbf{Qwen3-VL-2B-Instruct} is a general VLM with the strongest language model of the five; the
+prompt asks for all visible text in reading order, without describing the page or inventing unreadable text.
 
 \section{Experimental Results}
 % 1.6 pages.
@@ -39,5 +116,10 @@
 
 \section{Conclusion}
 % 0.25 page: which model for which situation.
+
+\begin{thebibliography}{1}\small
+\bibitem{oprb} OPRB: Occluded Pages Restoration Benchmark. Dataset:
+\url{https://huggingface.co/datasets/kpurkayastha/OPRB}; paper: arXiv:2604.10077.
+\end{thebibliography}
 
 \end{document}
