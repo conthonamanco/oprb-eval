@@ -197,10 +197,45 @@ Vì mỗi trang gốc chỉ xuất hiện với một loại vết, chênh lệc
 biệt giữa các trang, nên không nên diễn giải quá mức các chênh lệch nhỏ.
 
 \subsection{Ví dụ định tính}
-% TODO: dựng từ Output của notebooks/examples.ipynb (results/qualitative/examples.json và ảnh cắt).
-% Trang và đoạn trích chọn theo quy tắc cố định (src/oprb_eval/qualitative.py): trang trung vị chung (cả năm
-% mô hình trên cùng đoạn), trang phân vị 5 %, trang thiếu chữ và thừa chữ nhiều nhất. Mỗi ví dụ: ảnh cắt,
-% dòng GT, output của mô hình, một câu giải thích lỗi.
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.55\linewidth]{figures/qual_shared_median.png}
+
+\vspace{2pt}
+\footnotesize
+\begin{tabularx}{\linewidth}{@{}lrX@{}}
+\toprule
+Mô hình & WER & Output trên đoạn này \\
+\midrule
+docTR & .25 & đọc đúng nhãn (A7) và câu \textit{resulting again in a factor i, \ldots}; công thức gần như mất \\
+Tesseract & .38 & đọc đúng câu, bỏ công thức và nhãn (A7) \\
+LightOnOCR & .88 & đặt đoạn (A5) của trang vào đây: \textit{incurring a minus sign that is absent} \\
+Qwen3-VL & .88 & như LightOnOCR, thêm lỗi chính tả \textit{inequing} \\
+PP-OCR & .94 & ghép dòng của hai cột: \textit{(a3) \ldots alon withthe pinsplittin \ldots} \\
+\bottomrule
+\end{tabularx}
+\caption{Đoạn trích trên trang trung vị chung (White Burnt, 1\,\%, \texttt{text}): GT là phương trình (A7) và
+câu ngay sau nó. Đoạn được chọn tự động là đoạn mà WER của năm mô hình chênh nhau nhiều nhất.}
+\label{fig:qual}
+\end{figure}
+
+Trang và đoạn trích được chọn theo quy tắc cố định trên điểm số, không chọn tay: trang có F1 trung vị chung, rồi
+với mỗi mô hình là trang trung vị, trang ở phân vị 5\,\%, trang thừa chữ và thiếu chữ nhiều nhất. Hình~\ref{fig:qual}
+cho thấy công thức là chỗ khó chung: không mô hình nào đọc lại được công thức (A7). Với hai VLM, đoạn khớp nhất
+trong output lại là phương trình (A5) nằm phía trên, tức chúng không chép ra được đoạn này. Lỗi của PP-OCR là
+gộp hai dòng nằm ngang nhau ở hai cột thành một. Trên một trang danh mục tài liệu tham khảo (trang trung vị của
+PP-OCR), LightOnOCR gần như chép đúng (WER .04), Tesseract .14, còn PP-OCR .67 với nhiều từ bị cắt cụt.
+
+Các trường hợp xấu nhất phân biệt rõ hai nhóm mô hình. Hệ OCR thất bại bằng cách \emph{bỏ} chữ: trên một trang
+Sim có 802 từ GT, Tesseract, PP-OCR, docTR và cả LightOnOCR đều trả về rỗng. VLM tổng quát thì thất bại bằng
+cách \emph{bịa} chữ: trên chính trang đó Qwen3-VL viết 3553 từ về một mùa giải bóng rổ NBA không có trong ảnh
+trước khi bị chặn vì lặp. Lặp là kiểu lỗi thường gặp còn lại của Qwen3-VL: trên một trang khác chỉ có 581 từ GT,
+nó sinh chuỗi \texttt{|||l} lặp tới khi bị dừng, trong khi bốn mô hình còn lại vẫn đọc được phần lớn văn bản
+(WER .35--.65 trên đoạn trích). Trang trình chiếu mà GT chỉ có số trang ``40'' là trường hợp thừa chữ nhiều
+nhất của mọi mô hình: các hệ OCR đọc thêm 27--40 từ trên hình minh họa mà GT không ghi, LightOnOCR thêm 52 từ và
+một câu tự chú thích rằng ảnh không được đưa vào Markdown, còn Qwen3-VL sinh 113 từ, cuối cùng là chuỗi
+\texttt{x\^{}0 x\^{}1 \ldots{} x\^{}5} lặp lại. Vì GT của những trang này rất ngắn, chúng giải thích vì sao
+CER trung bình theo trang bị đẩy lên và vì sao chúng tôi báo cáo kèm CER micro.
 
 \subsection{Hiệu năng}
 % TODO (sau notebooks/latency.ipynb, 28/11): giây/trang ở batch 1 (trung bình, trung vị, p95), đỉnh VRAM,

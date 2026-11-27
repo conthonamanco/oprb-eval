@@ -1,0 +1,1596 @@
+[
+ {
+  "rule": "shared_median",
+  "model": "all",
+  "key": "text/White_Burnt__1p0pct__102.tar_1408.2718.gz_paper-31_6_ori",
+  "value": "0.7624273991223729",
+  "category": "text",
+  "occlusion_type": "White_Burnt",
+  "density": "1p0pct",
+  "reference_words": 566,
+  "output_words": {
+   "tesseract": 517,
+   "ppocrv5_mobile_en": 439,
+   "doctr_fast_parseq": 472,
+   "lightonocr2_1b": 550,
+   "qwen3_vl_2b": 491
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": false
+  },
+  "excerpt": {
+   "reference": "c1r↑c2l↓ = ei(φρ+ θρ−+φσ+ θσ−)e14([θ1ρ,θ2ρ]+[θ1σ,θ2σ]), (a7) resulting again in a factor i, and leading to equation",
+   "box": [
+    537.0,
+    536.0,
+    944.0,
+    610.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "= € resulting again in a factor i. and leading to equation",
+     "word_errors": 6,
+     "wer": 0.375
+    },
+    "ppocrv5_mobile_en": {
+     "text": "= iπθ(x − x′) (a3) 7 alon withthe pinsplittin tchue1it in c1r(x)c1l(x)∝−iexp(2iφ1(x)).",
+     "word_errors": 15,
+     "wer": 0.9375
+    },
+    "doctr_fast_parseq": {
+     "text": "= a a (a7) resulting again in a factor i, and leading to equation",
+     "word_errors": 4,
+     "wer": 0.25
+    },
+    "lightonocr2_1b": {
+     "text": "= - (2√2iφ_+(x) ), (a5) incurring a minus sign that is absent",
+     "word_errors": 14,
+     "wer": 0.875
+    },
+    "qwen3_vl_2b": {
+     "text": "= - exp (2√2iφ+ (x)), inequing a minus sign that is absent",
+     "word_errors": 14,
+     "wer": 0.875
+    }
+   }
+  },
+  "images": {
+   "crop": "00_shared_median_crop.png",
+   "page": "00_shared_median_page.png",
+   "box_scale": [
+    0.778,
+    1.049
+   ],
+   "image_size": [
+    778,
+    1049
+   ],
+   "crop_box": [
+    357,
+    502,
+    778,
+    699
+   ]
+  }
+ },
+ {
+  "rule": "median_f1",
+  "model": "tesseract",
+  "key": "nontext/Through_Dust__1p0pct__106.tar_1705.06742.gz_S=1_FM_JKeta_paper_resub_v1_8_ori",
+  "value": "0.7669902912621359",
+  "category": "nontext",
+  "occlusion_type": "Through_Dust",
+  "density": "1p0pct",
+  "reference_words": 885,
+  "output_words": {
+   "tesseract": 763,
+   "ppocrv5_mobile_en": 732,
+   "doctr_fast_parseq": 756,
+   "lightonocr2_1b": 766,
+   "qwen3_vl_2b": 651
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": false
+  },
+  "excerpt": {
+   "reference": "= ψ ̃ ∂ ψ ̃ + k (∂ + iησ )ψ ̃⊥ 2 + k(∂ ψ ̃z)2 ψ τ r y r − | | 2",
+   "box": [
+    558.0,
+    208.0,
+    887.0,
+    250.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "= ch (rode — ho 0) +f ar [ drlly, 0 0 ly =6-0:9 + k|(9, + ino). * + k(@,9°) - - - 2",
+     "word_errors": 24,
+     "wer": 0.8888888888888888
+    },
+    "ppocrv5_mobile_en": {
+     "text": "= ̄ξ · ∂≠ ̄φ + k|(∂r + iησy) ̄ξ⊥|2 + k(∂, ̄z)2 + u0 (2(m ζ2 −φ⊥,0 ̄x) + |",
+     "word_errors": 22,
+     "wer": 0.8148148148148148
+    },
+    "doctr_fast_parseq": {
+     "text": "= 0, for dmrg (black squares) and the classical solu- tion (red circles), the dashed fines are a fit to the",
+     "word_errors": 26,
+     "wer": 0.9629629629629629
+    },
+    "lightonocr2_1b": {
+     "text": "= ψ · ∂τ ψ + k |(∂r + iη σy) ψ_ |2 + k (∂r ψz)2 + u0 ( 2(m0z",
+     "word_errors": 20,
+     "wer": 0.7407407407407407
+    },
+    "qwen3_vl_2b": {
+     "text": "= φ_mf + ψ, under the assumption that the fluctuations are small compared to the mean field solution. we find it",
+     "word_errors": 25,
+     "wer": 0.9259259259259259
+    }
+   }
+  },
+  "images": {
+   "crop": "01_median_f1_crop.png",
+   "page": "01_median_f1_page.png",
+   "box_scale": [
+    0.78,
+    1.005
+   ],
+   "image_size": [
+    780,
+    1005
+   ],
+   "crop_box": [
+    375,
+    149,
+    751,
+    311
+   ]
+  }
+ },
+ {
+  "rule": "p05_f1",
+  "model": "tesseract",
+  "key": "text/White_Whitener__1p0pct__104.tar_1705.06048.gz_minimization1111111123_27_ori",
+  "value": "0.38947368421052636",
+  "category": "text",
+  "occlusion_type": "White_Whitener",
+  "density": "1p0pct",
+  "reference_words": 369,
+  "output_words": {
+   "tesseract": 201,
+   "ppocrv5_mobile_en": 170,
+   "doctr_fast_parseq": 198,
+   "lightonocr2_1b": 245,
+   "qwen3_vl_2b": 222
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": false
+  },
+  "excerpt": {
+   "reference": "(cid:107) (cid:107) (cid:104) ∗ − (cid:105) ∗ − ∗ ≥ t2 ah 2 + 2t ax b, ah + λ(p (x + th) p (x )) 0. (46) 2 a a",
+   "box": [
+    189.0,
+    431.0,
+    686.0,
+    454.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "[a + th) ~ be + ap (2\" + th), equivalen. 2] ar[2 + 20(az” — b, ar) + a(py(z\" + th) — py(z*)) 0. (46)",
+     "word_errors": 24,
+     "wer": 0.7741935483870968
+    },
+    "ppocrv5_mobile_en": {
+     "text": "k2 + λpa(x) ≤ ∥a(x* + th) − bk + λpa(x* + th), equivalen. tkh2 +2t(ax* − b,ah) +λ(p(x* + th) − pa(x°))≥ 0. (46)",
+     "word_errors": 25,
+     "wer": 0.8064516129032258
+    },
+    "doctr_fast_parseq": {
+     "text": "apa(a\") < ia(r\" + th) - miz + apa(x\" + th), equivalene. plane + 21(ar\" 1 b, ah) + a(p.(r\" + th) - pa(r)) > 0. (46)",
+     "word_errors": 24,
+     "wer": 0.7741935483870968
+    },
+    "lightonocr2_1b": {
+     "text": "\\|a(x^* + th) - b\\|22 + λ pa(x^* + th), equivalent to t2\\|ah\\|22 + 2t⟨ ax^* - b, ah ⟩ + λ(pa(x^* + th) - pa(x^*)) ≥ 0. (46)",
+     "word_errors": 25,
+     "wer": 0.8064516129032258
+    },
+    "qwen3_vl_2b": {
+     "text": "λp_a(x^*) ≤ ||a(x^* + th) - b||_2^2 + λp_a(x^* + th), equivalence t^2||ah||_2^2 + 2t(ax^* - b, ah) + λ(p_a(x^* + th) - p_a(x^*)) ≥ 0.",
+     "word_errors": 25,
+     "wer": 0.8064516129032258
+    }
+   }
+  },
+  "images": {
+   "crop": "02_p05_f1_crop.png",
+   "page": "02_p05_f1_page.png",
+   "box_scale": [
+    0.722,
+    1.01
+   ],
+   "image_size": [
+    722,
+    1010
+   ],
+   "crop_box": [
+    76,
+    375,
+    555,
+    518
+   ]
+  }
+ },
+ {
+  "rule": "most_extra_words",
+  "model": "tesseract",
+  "key": "nontext/White_Burnt__2p0pct__102.tar_1606.00144.gz_math_model_arxiv_39_ori",
+  "value": "31.0",
+  "category": "nontext",
+  "occlusion_type": "White_Burnt",
+  "density": "2p0pct",
+  "reference_words": 1,
+  "output_words": {
+   "tesseract": 31,
+   "ppocrv5_mobile_en": 27,
+   "doctr_fast_parseq": 40,
+   "lightonocr2_1b": 52,
+   "qwen3_vl_2b": 113
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": true
+  },
+  "excerpt": {
+   "reference": "40",
+   "box": [
+    490.0,
+    883.0,
+    506.0,
+    895.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "",
+     "word_errors": 1,
+     "wer": 1.0
+    },
+    "ppocrv5_mobile_en": {
+     "text": "40",
+     "word_errors": 0,
+     "wer": 0.0
+    },
+    "doctr_fast_parseq": {
+     "text": "40",
+     "word_errors": 0,
+     "wer": 0.0
+    },
+    "lightonocr2_1b": {
+     "text": "40",
+     "word_errors": 0,
+     "wer": 0.0
+    },
+    "qwen3_vl_2b": {
+     "text": "",
+     "word_errors": 1,
+     "wer": 1.0
+    }
+   }
+  },
+  "images": {
+   "crop": "03_most_extra_words_crop.png",
+   "page": "03_most_extra_words_page.png",
+   "box_scale": [
+    0.757,
+    1.035
+   ],
+   "image_size": [
+    757,
+    1035
+   ],
+   "crop_box": [
+    310,
+    853,
+    443,
+    986
+   ]
+  },
+  "output_tail": "* mad resulds eeee weee eee ere llp less visiblt mons uisisle (3 ) somme. numerical results; te wood a work) ¥ pecfrruemce in twmaye guehidy a — 2% [es 10"
+ },
+ {
+  "rule": "most_missing_words",
+  "model": "tesseract",
+  "key": "nontext/Through_Stamp__111.tar_1409.0499.gz_rad_23_ori",
+  "value": "0.0",
+  "category": "nontext",
+  "occlusion_type": "Through_Stamp",
+  "density": "none",
+  "reference_words": 118,
+  "output_words": {
+   "tesseract": 0,
+   "ppocrv5_mobile_en": 49,
+   "doctr_fast_parseq": 84,
+   "lightonocr2_1b": 159,
+   "qwen3_vl_2b": 64
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": true,
+   "qwen3_vl_2b": true
+  },
+  "excerpt": {
+   "reference": "110 2140 1340 2440 2380 2345 2940 440 413 1640 )",
+   "box": [
+    178.0,
+    419.0,
+    500.0,
+    641.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "",
+     "word_errors": 11,
+     "wer": 1.0
+    },
+    "ppocrv5_mobile_en": {
+     "text": "-1 518 318 518 -|0 81 18 1 (8 + )",
+     "word_errors": 10,
+     "wer": 0.9090909090909091
+    },
+    "doctr_fast_parseq": {
+     "text": "",
+     "word_errors": 11,
+     "wer": 1.0
+    },
+    "lightonocr2_1b": {
+     "text": "110 c 11 120 c 1 117 c",
+     "word_errors": 10,
+     "wer": 0.9090909090909091
+    },
+    "qwen3_vl_2b": {
+     "text": "",
+     "word_errors": 11,
+     "wer": 1.0
+    }
+   }
+  },
+  "images": {
+   "crop": "04_most_missing_words_crop.png",
+   "page": "04_most_missing_words_page.png",
+   "box_scale": [
+    0.803,
+    1.023
+   ],
+   "image_size": [
+    803,
+    1023
+   ],
+   "crop_box": [
+    82,
+    368,
+    461,
+    715
+   ]
+  },
+  "output_head": ""
+ },
+ {
+  "rule": "median_f1",
+  "model": "ppocrv5_mobile_en",
+  "key": "text/White_Burnt__1p0pct__102.tar_1408.2959.gz_MarcoLetizia_LocAndDiffInPQFT_16_ori",
+  "value": "0.6978922716627634",
+  "category": "text",
+  "occlusion_type": "White_Burnt",
+  "density": "1p0pct",
+  "reference_words": 681,
+  "output_words": {
+   "tesseract": 690,
+   "ppocrv5_mobile_en": 600,
+   "doctr_fast_parseq": 664,
+   "lightonocr2_1b": 678,
+   "qwen3_vl_2b": 657
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": false
+  },
+  "excerpt": {
+   "reference": "[35] m. arzano and t. trzesniewski, phys. rev. d 89, 124024 (2014) [arxiv:1404.4762 [hep-th]]. [36] g. calcagni, a. eichhorn and f. saueressig, phys. rev. d 87, no. 12, 124028 (2013) [arxiv:1304.7247 [hep-th]]. [37] t. p. sotiriou, m. visser and s. weinfurtner, phys. rev. d 84, 104018 (2011) [arxiv:1105.6098 [hep-th]].",
+   "box": [
+    90.0,
+    732.0,
+    878.0,
+    768.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "[35] m. arzano and t. trzesniewski, phys. rev. d 89, 124 iv:1404.4762 [hep-th]. [36] g. calcagni, a. eichhorn and f. saucressig, phys. rev. d 87, no. 12, 124028 (2013) (arxiv:1304.7247 [hep-th]]. [37] t. p. sotiriou, m. visser and s. weinfurtner, phys. rev. d 84, 104018 (2011) [arxiv:1105.6098",
+     "word_errors": 7,
+     "wer": 0.14285714285714285
+    },
+    "ppocrv5_mobile_en": {
+     "text": "m. arzano and t. trzesniewski, phys. rev. d 89, 12402 ) (ar.xiv:1404.4762 [hep-th]. [36] g.cala a. eic f. sasphy rv.d8. . 1 12402 (201 rxiv:1304.47 he- t. p.soti m. sr nd s. weir hy. re. 4. 104018 (201)rxi1105.6098 heph",
+     "word_errors": 33,
+     "wer": 0.673469387755102
+    },
+    "doctr_fast_parseq": {
+     "text": "m. arzano and t. trzesniewski, phys. rev. d 89, 12402 311.3135 ler-qe). g. calcagni, a. eichhorn and f. saueressig. phys. rev. d 87, no. 12, 124028 (2013) (arxiv:1304.7247 (hep-thl). [arxiv:1404.4762 [hep-th]). 37 t. p. sotiriou, m. visser and s. weinfurtner, phys. rev. d 84. 104018 (2011) [arxiv:1105.6098",
+     "word_errors": 14,
+     "wer": 0.2857142857142857
+    },
+    "lightonocr2_1b": {
+     "text": "[35] m. arzano and t. trzesniewski, phys. rev. d 89, 124028 (2013) [arxiv:1404.4762 [hep-th]]. [36] g. calcagni, a. eichhorn and f. saueressig, phys. rev. d 87, no. 12, 124028 (2013) [arxiv:1304.7247 [hep-th]]. [37] t. p. sotiriou, m. visser and s. weinfurtner, phys. rev. d 84, 104018 (2011) [arxiv:1105.6098 [hep-th]].",
+     "word_errors": 2,
+     "wer": 0.04081632653061224
+    },
+    "qwen3_vl_2b": {
+     "text": "m. arzano and t. trzesniewski, phys. rev. d 89, 124028 (2014) [arxiv:1304.7247 [hep-th]]. [35] g. calcagni, a. eichhorn and f. sausergiss, phys. rev. d 87, no. 12, 124028 (2013) [arxiv:1304.6098 [hep-th]]. [36] t. p. sotiriou, m. visser and s. weinfrtter, phys. rev. d 84, 104018 (2011) [arxiv:1105.6098 [hep-th]].",
+     "word_errors": 8,
+     "wer": 0.16326530612244897
+    }
+   }
+  },
+  "images": {
+   "crop": "05_median_f1_crop.png",
+   "page": "05_median_f1_page.png",
+   "box_scale": [
+    0.762,
+    1.038
+   ],
+   "image_size": [
+    762,
+    1038
+   ],
+   "crop_box": [
+    8,
+    699,
+    729,
+    857
+   ]
+  }
+ },
+ {
+  "rule": "p05_f1",
+  "model": "ppocrv5_mobile_en",
+  "key": "nontext/White_Burnt__1p0pct__101.tar_1705.04523.gz_Jia_Pennington_Pade_9_ori",
+  "value": "0.3358098068350669",
+  "category": "nontext",
+  "occlusion_type": "White_Burnt",
+  "density": "1p0pct",
+  "reference_words": 459,
+  "output_words": {
+   "tesseract": 290,
+   "ppocrv5_mobile_en": 214,
+   "doctr_fast_parseq": 272,
+   "lightonocr2_1b": 318,
+   "qwen3_vl_2b": 80
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": true
+  },
+  "excerpt": {
+   "reference": "lines are pad ́e approximations directly applied to functions in eq. (52). | − on the right are shown the relative errors defined by ∆ = [r(s)",
+   "box": [
+    88.0,
+    457.0,
+    557.0,
+    481.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "lines are padé approximations directly applied to functions in eq. (52). the red solid lines are approximations using eq. (54). on the right are shown the relative errors defined by a =",
+     "word_errors": 13,
+     "wer": 0.48148148148148145
+    },
+    "ppocrv5_mobile_en": {
+     "text": "are to be reparameterized by introducing an intermediate =(1− λa)ms(p+m 2− λ)α p−m spectral function s(z) for the nontrivial imaginary parts",
+     "word_errors": 25,
+     "wer": 0.9259259259259259
+    },
+    "doctr_fast_parseq": {
+     "text": "lines are padé approximations directly applied to functions in eq. (52). the red solid lines are approximations using eq- (54). on the right are shown the relative errors defined by a =",
+     "word_errors": 13,
+     "wer": 0.48148148148148145
+    },
+    "lightonocr2_1b": {
+     "text": "lines are padé approximations directly applied to functions in eq. (52). the red solid lines are approximations using eq. (54). on the right are shown the relative errors defined by δ =",
+     "word_errors": 13,
+     "wer": 0.48148148148148145
+    },
+    "qwen3_vl_2b": {
+     "text": "α = 3, n = 4 m2r1(s) 100 101 102 103 104 105 x = s/m2−1 m2r2(s) 100 101 102 103 104 105 106 x =",
+     "word_errors": 26,
+     "wer": 0.9629629629629629
+    }
+   }
+  },
+  "images": {
+   "crop": "06_p05_f1_crop.png",
+   "page": "06_p05_f1_page.png",
+   "box_scale": [
+    0.842,
+    1.052
+   ],
+   "image_size": [
+    842,
+    1052
+   ],
+   "crop_box": [
+    14,
+    420,
+    528,
+    566
+   ]
+  }
+ },
+ {
+  "rule": "most_extra_words",
+  "model": "ppocrv5_mobile_en",
+  "key": "nontext/White_Burnt__2p0pct__102.tar_1606.00144.gz_math_model_arxiv_39_ori",
+  "value": "27.0",
+  "category": "nontext",
+  "occlusion_type": "White_Burnt",
+  "density": "2p0pct",
+  "reference_words": 1,
+  "output_words": {
+   "tesseract": 31,
+   "ppocrv5_mobile_en": 27,
+   "doctr_fast_parseq": 40,
+   "lightonocr2_1b": 52,
+   "qwen3_vl_2b": 113
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": true
+  },
+  "excerpt": {
+   "reference": "40",
+   "box": [
+    490.0,
+    883.0,
+    506.0,
+    895.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "",
+     "word_errors": 1,
+     "wer": 1.0
+    },
+    "ppocrv5_mobile_en": {
+     "text": "40",
+     "word_errors": 0,
+     "wer": 0.0
+    },
+    "doctr_fast_parseq": {
+     "text": "40",
+     "word_errors": 0,
+     "wer": 0.0
+    },
+    "lightonocr2_1b": {
+     "text": "40",
+     "word_errors": 0,
+     "wer": 0.0
+    },
+    "qwen3_vl_2b": {
+     "text": "",
+     "word_errors": 1,
+     "wer": 1.0
+    }
+   }
+  },
+  "images": {
+   "crop": "07_most_extra_words_crop.png",
+   "page": "07_most_extra_words_page.png",
+   "box_scale": [
+    0.757,
+    1.035
+   ],
+   "image_size": [
+    757,
+    1035
+   ],
+   "crop_box": [
+    310,
+    853,
+    443,
+    986
+   ]
+  },
+  "output_tail": "3 sme numerical results: the mod at work! * mad results 2781sia 5527 2c/28 3sme numericalresults: the mod at wor! * porformance in image quodity 22/28 40"
+ },
+ {
+  "rule": "most_missing_words",
+  "model": "ppocrv5_mobile_en",
+  "key": "text/Sim__110.tar_1507.04377.gz_master_12_ori",
+  "value": "0.0",
+  "category": "text",
+  "occlusion_type": "Sim",
+  "density": "none",
+  "reference_words": 802,
+  "output_words": {
+   "tesseract": 0,
+   "ppocrv5_mobile_en": 0,
+   "doctr_fast_parseq": 0,
+   "lightonocr2_1b": 0,
+   "qwen3_vl_2b": 3553
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": true
+  },
+  "excerpt": {
+   "reference": "as listed in the legends. the solid lines are given by the distribution functions, eqs. (22), (23), (27), and (28). the dotted lines in (a) and (e) are gaussian fits, see ref. [? ], while those in (b) and (f) are the q-gaussian distributions for (cc). fig. 12. (color online) semi-logarithmic plots of the cpds in (a) (cv) and (b) (vc) under compression, and in (c) (cv) and",
+   "box": [
+    88.0,
+    104.0,
+    918.0,
+    169.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "",
+     "word_errors": 68,
+     "wer": 1.0
+    },
+    "ppocrv5_mobile_en": {
+     "text": "",
+     "word_errors": 68,
+     "wer": 1.0
+    },
+    "doctr_fast_parseq": {
+     "text": "",
+     "word_errors": 68,
+     "wer": 1.0
+    },
+    "lightonocr2_1b": {
+     "text": "",
+     "word_errors": 68,
+     "wer": 1.0
+    },
+    "qwen3_vl_2b": {
+     "text": "in the united states. it was the first season of the nba's new 82-game schedule, which was introduced in 1999. the season began on october 21, 1999, and ended on april 10, 2000. the nba was formed in 1949 as a merger of the american basketball association (aba) and the national basketball league (nbl).",
+     "word_errors": 60,
+     "wer": 0.8823529411764706
+    }
+   }
+  },
+  "output_head": ""
+ },
+ {
+  "rule": "median_f1",
+  "model": "doctr_fast_parseq",
+  "key": "nontext/White_Burnt__0p5pct__100.tar_1705.04102.gz_Paper_arXiv_18_ori",
+  "value": "0.7813411078717202",
+  "category": "nontext",
+  "occlusion_type": "White_Burnt",
+  "density": "0p5pct",
+  "reference_words": 167,
+  "output_words": {
+   "tesseract": 135,
+   "ppocrv5_mobile_en": 164,
+   "doctr_fast_parseq": 176,
+   "lightonocr2_1b": 124,
+   "qwen3_vl_2b": 188
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": true
+  },
+  "excerpt": {
+   "reference": "δ = δ + chα, (38) 0 the power α is directly accessible by the slope of the variation of the quantity ∆δ =",
+   "box": [
+    142.0,
+    742.0,
+    879.0,
+    825.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "= dy + che, (38) the power a is directly accessible by the slope of the variation of the quantity ad =",
+     "word_errors": 6,
+     "wer": 0.25
+    },
+    "ppocrv5_mobile_en": {
+     "text": "δ = δ0 + cha, (38) the power α is directly accesible by the slope of the variation of the quantity δδ =",
+     "word_errors": 5,
+     "wer": 0.20833333333333334
+    },
+    "doctr_fast_parseq": {
+     "text": "= 5(h) )-6(h/2) as a function of h in log-log scale, even when the exact value of 80 is",
+     "word_errors": 21,
+     "wer": 0.875
+    },
+    "lightonocr2_1b": {
+     "text": "δ = δ0 + chα, (38) the power α is directly accessible by the slope of the variation of the quantity δδ =",
+     "word_errors": 3,
+     "wer": 0.125
+    },
+    "qwen3_vl_2b": {
+     "text": "δ of the form log10 (δδ) -1 -2 -3 -4 -5 -6 -7 -8 -9 -10 -11 -3 -2.5",
+     "word_errors": 22,
+     "wer": 0.9166666666666666
+    }
+   }
+  },
+  "images": {
+   "crop": "09_median_f1_crop.png",
+   "page": "09_median_f1_page.png",
+   "box_scale": [
+    0.848,
+    1.057
+   ],
+   "image_size": [
+    848,
+    1057
+   ],
+   "crop_box": [
+    60,
+    724,
+    805,
+    932
+   ]
+  }
+ },
+ {
+  "rule": "p05_f1",
+  "model": "doctr_fast_parseq",
+  "key": "text/Through_Stamp__111.tar_1606.03906.gz_unbounded23-arxiv_82_ori",
+  "value": "0.4172494172494173",
+  "category": "text",
+  "occlusion_type": "Through_Stamp",
+  "density": "none",
+  "reference_words": 594,
+  "output_words": {
+   "tesseract": 219,
+   "ppocrv5_mobile_en": 267,
+   "doctr_fast_parseq": 264,
+   "lightonocr2_1b": 460,
+   "qwen3_vl_2b": 301
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": true
+  },
+  "excerpt": {
+   "reference": "x0 0 x0 − { ∈ r − (cid:54) } { ∈ r − (cid:62) } define h := x n+1 : x x , v 0 , h+ := x n+1 : x x , v 0 .",
+   "box": [
+    206.0,
+    600.0,
+    796.0,
+    629.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "0 since ro spu + 17+ (fp) i arr the principal curvatures of the parallel curves of the graph of f are given by j'(s) sas rm 00 this function is also decreasing when s > 0",
+     "word_errors": 37,
+     "wer": 0.9487179487179487
+    },
+    "ppocrv5_mobile_en": {
+     "text": "0 since (1+(f )2)5/2 the riu a r a s(1 + f ()2)1/2 8 >0. () this function is also decreasing when s > 0 as f ′ −f (1 +(",
+     "word_errors": 37,
+     "wer": 0.9487179487179487
+    },
+    "doctr_fast_parseq": {
+     "text": "0 since x -3/(0\"?+s\"(+u0?) 0. (1+(f)3)2 the principal curvatures of the parallel curves of the graph of / are given by s(1 + f'(s)2)1/2\" s>0. f\"(s) this function is also decreasing when 8 > 0",
+     "word_errors": 37,
+     "wer": 0.9487179487179487
+    },
+    "lightonocr2_1b": {
+     "text": "0 as ( f's(1 + (f')2)1/2 )' = -f'(1 + (f')2) + sf''s2(1 + (f')2)3/2 and sf'' f' because of the concavity of f' and the fact that f'(0) = 0 .",
+     "word_errors": 36,
+     "wer": 0.9230769230769231
+    },
+    "qwen3_vl_2b": {
+     "text": "0 for all r > 0. proof. let c′ = c′. for any x ∈ {x : f(x) = 0, f(x) = 0} ∈ c′, {0}, consider the meridian vector w′",
+     "word_errors": 36,
+     "wer": 0.9230769230769231
+    }
+   }
+  },
+  "images": {
+   "crop": "10_p05_f1_crop.png",
+   "page": "10_p05_f1_page.png",
+   "box_scale": [
+    0.799,
+    1.02
+   ],
+   "image_size": [
+    799,
+    1020
+   ],
+   "crop_box": [
+    104,
+    552,
+    696,
+    701
+   ]
+  }
+ },
+ {
+  "rule": "most_extra_words",
+  "model": "doctr_fast_parseq",
+  "key": "nontext/White_Burnt__2p0pct__102.tar_1606.00144.gz_math_model_arxiv_39_ori",
+  "value": "40.0",
+  "category": "nontext",
+  "occlusion_type": "White_Burnt",
+  "density": "2p0pct",
+  "reference_words": 1,
+  "output_words": {
+   "tesseract": 31,
+   "ppocrv5_mobile_en": 27,
+   "doctr_fast_parseq": 40,
+   "lightonocr2_1b": 52,
+   "qwen3_vl_2b": 113
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": true
+  },
+  "excerpt": {
+   "reference": "40",
+   "box": [
+    490.0,
+    883.0,
+    506.0,
+    895.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "",
+     "word_errors": 1,
+     "wer": 1.0
+    },
+    "ppocrv5_mobile_en": {
+     "text": "40",
+     "word_errors": 0,
+     "wer": 0.0
+    },
+    "doctr_fast_parseq": {
+     "text": "40",
+     "word_errors": 0,
+     "wer": 0.0
+    },
+    "lightonocr2_1b": {
+     "text": "40",
+     "word_errors": 0,
+     "wer": 0.0
+    },
+    "qwen3_vl_2b": {
+     "text": "",
+     "word_errors": 1,
+     "wer": 1.0
+    }
+   }
+  },
+  "images": {
+   "crop": "11_most_extra_words_crop.png",
+   "page": "11_most_extra_words_page.png",
+   "box_scale": [
+    0.757,
+    1.035
+   ],
+   "image_size": [
+    757,
+    1035
+   ],
+   "crop_box": [
+    310,
+    853,
+    443,
+    986
+   ]
+  },
+  "output_tail": "3) some numerical results: * mad results - afre son e aff - af i 3. some numerical results: * perf-rman ca in tunage quolits 40 the model at work! i i ! - 26/28 the model at work! 27/es"
+ },
+ {
+  "rule": "most_missing_words",
+  "model": "doctr_fast_parseq",
+  "key": "text/Sim__110.tar_1507.04377.gz_master_12_ori",
+  "value": "0.0",
+  "category": "text",
+  "occlusion_type": "Sim",
+  "density": "none",
+  "reference_words": 802,
+  "output_words": {
+   "tesseract": 0,
+   "ppocrv5_mobile_en": 0,
+   "doctr_fast_parseq": 0,
+   "lightonocr2_1b": 0,
+   "qwen3_vl_2b": 3553
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": true
+  },
+  "excerpt": {
+   "reference": "as listed in the legends. the solid lines are given by the distribution functions, eqs. (22), (23), (27), and (28). the dotted lines in (a) and (e) are gaussian fits, see ref. [? ], while those in (b) and (f) are the q-gaussian distributions for (cc). fig. 12. (color online) semi-logarithmic plots of the cpds in (a) (cv) and (b) (vc) under compression, and in (c) (cv) and",
+   "box": [
+    88.0,
+    104.0,
+    918.0,
+    169.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "",
+     "word_errors": 68,
+     "wer": 1.0
+    },
+    "ppocrv5_mobile_en": {
+     "text": "",
+     "word_errors": 68,
+     "wer": 1.0
+    },
+    "doctr_fast_parseq": {
+     "text": "",
+     "word_errors": 68,
+     "wer": 1.0
+    },
+    "lightonocr2_1b": {
+     "text": "",
+     "word_errors": 68,
+     "wer": 1.0
+    },
+    "qwen3_vl_2b": {
+     "text": "in the united states. it was the first season of the nba's new 82-game schedule, which was introduced in 1999. the season began on october 21, 1999, and ended on april 10, 2000. the nba was formed in 1949 as a merger of the american basketball association (aba) and the national basketball league (nbl).",
+     "word_errors": 60,
+     "wer": 0.8823529411764706
+    }
+   }
+  },
+  "output_head": ""
+ },
+ {
+  "rule": "median_f1",
+  "model": "lightonocr2_1b",
+  "key": "text/White_Burnt__0p5pct__100.tar_1605.09470.gz_NCZ2_6_ori",
+  "value": "0.8255208333333333",
+  "category": "text",
+  "occlusion_type": "White_Burnt",
+  "density": "0p5pct",
+  "reference_words": 398,
+  "output_words": {
+   "tesseract": 360,
+   "ppocrv5_mobile_en": 338,
+   "doctr_fast_parseq": 345,
+   "lightonocr2_1b": 370,
+   "qwen3_vl_2b": 348
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": false
+  },
+  "excerpt": {
+   "reference": "kq ( 3). in this case, the invariant can be computed by the odd 2 2 topological index, which is the odd chˆern character of the unitary g,",
+   "box": [
+    181.0,
+    710.0,
+    816.0,
+    762.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "kq (t®). more precisely. g : (t%. 7) = (u(2), ¢) is the transition function of the quaternionic 7",
+     "word_errors": 23,
+     "wer": 0.8214285714285714
+    },
+    "ppocrv5_mobile_en": {
+     "text": "z2 k (t3). in this case, the z2 invariant can be computed by the odd topological index, which is the odd chern character of the unitary g,",
+     "word_errors": 7,
+     "wer": 0.25
+    },
+    "doctr_fast_parseq": {
+     "text": "€ kg (t*). in this case, the za invariant can be computed by the odd topological index, which is the odd chern character of the unitary g,",
+     "word_errors": 7,
+     "wer": 0.25
+    },
+    "lightonocr2_1b": {
+     "text": "( t3, τ) → (u(2), σ) is the transition function of the quaternionic 7",
+     "word_errors": 23,
+     "wer": 0.8214285714285714
+    },
+    "qwen3_vl_2b": {
+     "text": "z2 ∈ k̄q−1(t3). in this case, the z2 invariant can be computed by the odd topological index, which is the odd chern character of the unitary g,",
+     "word_errors": 7,
+     "wer": 0.25
+    }
+   }
+  },
+  "images": {
+   "crop": "13_median_f1_crop.png",
+   "page": "13_median_f1_page.png",
+   "box_scale": [
+    0.837,
+    1.048
+   ],
+   "image_size": [
+    837,
+    1048
+   ],
+   "crop_box": [
+    91,
+    684,
+    742,
+    858
+   ]
+  }
+ },
+ {
+  "rule": "p05_f1",
+  "model": "lightonocr2_1b",
+  "key": "text/White_Whitener__1p0pct__104.tar_1705.05959.gz_GMsFEM_localize_mixed_v9_10_ori",
+  "value": "0.47619047619047616",
+  "category": "text",
+  "occlusion_type": "White_Whitener",
+  "density": "1p0pct",
+  "reference_words": 475,
+  "output_words": {
+   "tesseract": 271,
+   "ppocrv5_mobile_en": 191,
+   "doctr_fast_parseq": 231,
+   "lightonocr2_1b": 344,
+   "qwen3_vl_2b": 346
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": false
+  },
+  "excerpt": {
+   "reference": "j j,ms v j j,ms s lemma 6. let (ψ(i), q(i)) be the solution of (12)-(13) and let (ψ(i) , q(i) ) be the solution of (10)-(11). j j j,ms j,ms",
+   "box": [
+    117.0,
+    582.0,
+    882.0,
+    622.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "v = 3° v!\"), where the sum is taken over all k; c s. next, we will show the required property (33). note that,",
+     "word_errors": 29,
+     "wer": 0.9354838709677419
+    },
+    "ppocrv5_mobile_en": {
+     "text": "v + ( q|), (37) for all (v,q) vo(k†) × q(k†). proof. using 1 1 and 10-, we have a(ψ() − ψ()ms, v) −",
+     "word_errors": 30,
+     "wer": 0.967741935483871
+    },
+    "doctr_fast_parseq": {
+     "text": "lego wyan llv and ligfo ghallalla. lemma 6. let (vf be the solution of 12)-113 and let (w) (0 be the solution of 110-11",
+     "word_errors": 18,
+     "wer": 0.5806451612903226
+    },
+    "lightonocr2_1b": {
+     "text": "v = ∑ v(i) , where the sum is taken over all ki ⊂ s . next, we will show the required property 35",
+     "word_errors": 29,
+     "wer": 0.9354838709677419
+    },
+    "qwen3_vl_2b": {
+     "text": "v = ∑ v(i), where the sum is taken over all ki ⊂ s. next, we will show the required property (35). note that,",
+     "word_errors": 29,
+     "wer": 0.9354838709677419
+    }
+   }
+  },
+  "images": {
+   "crop": "14_p05_f1_crop.png",
+   "page": "14_p05_f1_page.png",
+   "box_scale": [
+    0.794,
+    1.016
+   ],
+   "image_size": [
+    794,
+    1016
+   ],
+   "crop_box": [
+    32,
+    531,
+    760,
+    691
+   ]
+  }
+ },
+ {
+  "rule": "most_extra_words",
+  "model": "lightonocr2_1b",
+  "key": "nontext/White_Burnt__2p0pct__102.tar_1606.00144.gz_math_model_arxiv_39_ori",
+  "value": "52.0",
+  "category": "nontext",
+  "occlusion_type": "White_Burnt",
+  "density": "2p0pct",
+  "reference_words": 1,
+  "output_words": {
+   "tesseract": 31,
+   "ppocrv5_mobile_en": 27,
+   "doctr_fast_parseq": 40,
+   "lightonocr2_1b": 52,
+   "qwen3_vl_2b": 113
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": true
+  },
+  "excerpt": {
+   "reference": "40",
+   "box": [
+    490.0,
+    883.0,
+    506.0,
+    895.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "",
+     "word_errors": 1,
+     "wer": 1.0
+    },
+    "ppocrv5_mobile_en": {
+     "text": "40",
+     "word_errors": 0,
+     "wer": 0.0
+    },
+    "doctr_fast_parseq": {
+     "text": "40",
+     "word_errors": 0,
+     "wer": 0.0
+    },
+    "lightonocr2_1b": {
+     "text": "40",
+     "word_errors": 0,
+     "wer": 0.0
+    },
+    "qwen3_vl_2b": {
+     "text": "",
+     "word_errors": 1,
+     "wer": 1.0
+    }
+   }
+  },
+  "images": {
+   "crop": "15_most_extra_words_crop.png",
+   "page": "15_most_extra_words_page.png",
+   "box_scale": [
+    0.757,
+    1.035
+   ],
+   "image_size": [
+    757,
+    1035
+   ],
+   "crop_box": [
+    310,
+    853,
+    443,
+    986
+   ]
+  },
+  "output_tail": "3 some numerical results: the model at work! * mad results 3 some numerical results: the model at work! * performance in image quality 40 note: the actual images are not included in the markdown as they cannot be represented in text format. the placeholders indicate where the images would be placed."
+ },
+ {
+  "rule": "most_missing_words",
+  "model": "lightonocr2_1b",
+  "key": "text/Sim__110.tar_1507.04377.gz_master_12_ori",
+  "value": "0.0",
+  "category": "text",
+  "occlusion_type": "Sim",
+  "density": "none",
+  "reference_words": 802,
+  "output_words": {
+   "tesseract": 0,
+   "ppocrv5_mobile_en": 0,
+   "doctr_fast_parseq": 0,
+   "lightonocr2_1b": 0,
+   "qwen3_vl_2b": 3553
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": true
+  },
+  "excerpt": {
+   "reference": "as listed in the legends. the solid lines are given by the distribution functions, eqs. (22), (23), (27), and (28). the dotted lines in (a) and (e) are gaussian fits, see ref. [? ], while those in (b) and (f) are the q-gaussian distributions for (cc). fig. 12. (color online) semi-logarithmic plots of the cpds in (a) (cv) and (b) (vc) under compression, and in (c) (cv) and",
+   "box": [
+    88.0,
+    104.0,
+    918.0,
+    169.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "",
+     "word_errors": 68,
+     "wer": 1.0
+    },
+    "ppocrv5_mobile_en": {
+     "text": "",
+     "word_errors": 68,
+     "wer": 1.0
+    },
+    "doctr_fast_parseq": {
+     "text": "",
+     "word_errors": 68,
+     "wer": 1.0
+    },
+    "lightonocr2_1b": {
+     "text": "",
+     "word_errors": 68,
+     "wer": 1.0
+    },
+    "qwen3_vl_2b": {
+     "text": "in the united states. it was the first season of the nba's new 82-game schedule, which was introduced in 1999. the season began on october 21, 1999, and ended on april 10, 2000. the nba was formed in 1949 as a merger of the american basketball association (aba) and the national basketball league (nbl).",
+     "word_errors": 60,
+     "wer": 0.8823529411764706
+    }
+   }
+  },
+  "output_head": ""
+ },
+ {
+  "rule": "median_f1",
+  "model": "qwen3_vl_2b",
+  "key": "nontext/Sim__110.tar_1408.6960.gz_paper043_1_ori",
+  "value": "0.799470549305096",
+  "category": "nontext",
+  "occlusion_type": "Sim",
+  "density": "none",
+  "reference_words": 787,
+  "output_words": {
+   "tesseract": 714,
+   "ppocrv5_mobile_en": 667,
+   "doctr_fast_parseq": 703,
+   "lightonocr2_1b": 752,
+   "qwen3_vl_2b": 724
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": false
+  },
+  "excerpt": {
+   "reference": "λ k3 + k−3 σ . (1) x y y x 2m 2 + z",
+   "box": [
+    170.0,
+    355.0,
+    502.0,
+    383.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "+ f +k2)o.. (1) 2m here k = k,.k, denotes in-plane quasiparticle",
+     "word_errors": 13,
+     "wer": 0.8666666666666667
+    },
+    "ppocrv5_mobile_en": {
+     "text": "+ x|re- √( +x2 x 1 0 × re √0x3 + x",
+     "word_errors": 12,
+     "wer": 0.8
+    },
+    "doctr_fast_parseq": {
+     "text": "+ vpr + a26 cos? 30, (2) el(k,0) = 2m 2 42",
+     "word_errors": 12,
+     "wer": 0.8
+    },
+    "lightonocr2_1b": {
+     "text": "+ ky22m + λ2(k_+3 + k_-3)σz. (1) here k = \\kx, ky\\",
+     "word_errors": 13,
+     "wer": 0.8666666666666667
+    },
+    "qwen3_vl_2b": {
+     "text": "λ = 0, the hamiltonian (1) is just the brychkov-rashba hamiltonian for",
+     "word_errors": 13,
+     "wer": 0.8666666666666667
+    }
+   }
+  },
+  "images": {
+   "crop": "17_median_f1_crop.png",
+   "page": "17_median_f1_page.png",
+   "box_scale": [
+    0.787,
+    1.055
+   ],
+   "image_size": [
+    787,
+    1055
+   ],
+   "crop_box": [
+    73,
+    314,
+    455,
+    464
+   ]
+  }
+ },
+ {
+  "rule": "p05_f1",
+  "model": "qwen3_vl_2b",
+  "key": "text/Sim__110.tar_1408.6835.gz_nonsimplylaced_revised_10_ori",
+  "value": "0.15135135135135136",
+  "category": "text",
+  "occlusion_type": "Sim",
+  "density": "none",
+  "reference_words": 275,
+  "output_words": {
+   "tesseract": 101,
+   "ppocrv5_mobile_en": 169,
+   "doctr_fast_parseq": 172,
+   "lightonocr2_1b": 116,
+   "qwen3_vl_2b": 280
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": true
+  },
+  "excerpt": {
+   "reference": "n 3 intervals table 3. quiver diagrams from which the hilbert series of the moduli space of k instanton in classical gauge groups can be computed using the monopole formula for the coulomb",
+   "box": [
+    140.0,
+    712.0,
+    860.0,
+    788.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "es 3. quiver diagrams from which the hilbert series of the moduli space of k instanton in classical gauge groups can be computed using the monopole formula for the coulomb",
+     "word_errors": 4,
+     "wer": 0.12121212121212122
+    },
+    "ppocrv5_mobile_en": {
+     "text": "n - 3 ip on- 3. quiver diagrams from which the hilbert series of the moduli space of k instanton in classical gauge groups can be computed using the monopole formula for the coulomb",
+     "word_errors": 3,
+     "wer": 0.09090909090909091
+    },
+    "doctr_fast_parseq": {
+     "text": "intervals ns5 * 2k 24 dn y 24 2k k da n-5 nodes * on- on- n-3 intskiveda tysk 3. quiver diagrams from which the hilbert series of the moduli space of k instanton in classical gauge groups can",
+     "word_errors": 28,
+     "wer": 0.8484848484848485
+    },
+    "lightonocr2_1b": {
+     "text": "n dn y table 3. quiver diagrams from which the hilbert series of the moduli space of k instanton in classical gauge groups can be computed using the monopole formula for the coulomb",
+     "word_errors": 2,
+     "wer": 0.06060606060606061
+    },
+    "qwen3_vl_2b": {
+     "text": "g l coulomb branch quivers brane set-up an y k k k 1 k k k k k k k k k k k k k",
+     "word_errors": 32,
+     "wer": 0.9696969696969697
+    }
+   }
+  },
+  "images": {
+   "crop": "18_p05_f1_crop.png",
+   "page": "18_p05_f1_page.png",
+   "box_scale": [
+    0.81,
+    1.028
+   ],
+   "image_size": [
+    810,
+    1028
+   ],
+   "crop_box": [
+    53,
+    671,
+    756,
+    870
+   ]
+  }
+ },
+ {
+  "rule": "most_extra_words",
+  "model": "qwen3_vl_2b",
+  "key": "nontext/White_Burnt__2p0pct__102.tar_1606.00144.gz_math_model_arxiv_39_ori",
+  "value": "113.0",
+  "category": "nontext",
+  "occlusion_type": "White_Burnt",
+  "density": "2p0pct",
+  "reference_words": 1,
+  "output_words": {
+   "tesseract": 31,
+   "ppocrv5_mobile_en": 27,
+   "doctr_fast_parseq": 40,
+   "lightonocr2_1b": 52,
+   "qwen3_vl_2b": 113
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": true
+  },
+  "excerpt": {
+   "reference": "40",
+   "box": [
+    490.0,
+    883.0,
+    506.0,
+    895.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "",
+     "word_errors": 1,
+     "wer": 1.0
+    },
+    "ppocrv5_mobile_en": {
+     "text": "40",
+     "word_errors": 0,
+     "wer": 0.0
+    },
+    "doctr_fast_parseq": {
+     "text": "40",
+     "word_errors": 0,
+     "wer": 0.0
+    },
+    "lightonocr2_1b": {
+     "text": "40",
+     "word_errors": 0,
+     "wer": 0.0
+    },
+    "qwen3_vl_2b": {
+     "text": "",
+     "word_errors": 1,
+     "wer": 1.0
+    }
+   }
+  },
+  "images": {
+   "crop": "19_most_extra_words_crop.png",
+   "page": "19_most_extra_words_page.png",
+   "box_scale": [
+    0.757,
+    1.035
+   ],
+   "image_size": [
+    757,
+    1035
+   ],
+   "crop_box": [
+    310,
+    853,
+    443,
+    986
+   ]
+  },
+  "output_tail": "x^3 x^4 x^5 x^0 x^1 x^2 x^3 x^4 x^5 x^0 x^1 x^2 x^3 x^4 x^5 x^0 x^1 x^2 x^3 x^4 x^5 x^0 x^1 x^2 x^3 x^4 x^5 x^0 x^1 x^2 x^3 x^4 x^5 x^0 x^1 x^2 x^3 x^4 x^5 x^0 x^1 x^2 x^3 x^4 x^5 x^0 x^1 x^2 x^3 x^4 x^5 x^0 x^1 x^2 x^3 x^4 x^5 x^0 x^1 x"
+ },
+ {
+  "rule": "most_missing_words",
+  "model": "qwen3_vl_2b",
+  "key": "nontext/Through_Dust__0p5pct__106.tar_1408.4859.gz_DSCC2014_Synthesis_2_ori",
+  "value": "0.0017211703958691911",
+  "category": "nontext",
+  "occlusion_type": "Through_Dust",
+  "density": "0p5pct",
+  "reference_words": 581,
+  "output_words": {
+   "tesseract": 650,
+   "ppocrv5_mobile_en": 455,
+   "doctr_fast_parseq": 629,
+   "lightonocr2_1b": 683,
+   "qwen3_vl_2b": 1
+  },
+  "truncated": {
+   "tesseract": false,
+   "ppocrv5_mobile_en": false,
+   "doctr_fast_parseq": false,
+   "lightonocr2_1b": false,
+   "qwen3_vl_2b": true
+  },
+  "excerpt": {
+   "reference": "e.g., p. 160-161, [23])) the wasserstein distance between gaus- sian and dirac pdf supported on rn, with respective joint pdfs σ = n (μ,σ) and δ (x) = lim→ n (μ,σ), is given by,",
+   "box": [
+    522.0,
+    826.0,
+    941.0,
+    879.0
+   ],
+   "models": {
+    "tesseract": {
+     "text": "p. 160-161, [23])) the wasserstein distance between gaus- sian and dirac pdf supported on r\", with respective joint pdfs s=n(u.x)and § (x) = , ad (i, x), is given by,",
+     "word_errors": 12,
+     "wer": 0.35294117647058826
+    },
+    "ppocrv5_mobile_en": {
+     "text": "between gaussian and dirac pdf (see 0hewassstn distan beteen sian and dirac pdf supported onr\", with respective joint pdfs ζ=m (μ,)and δ(x)= limm (μ,∑) is given by,",
+     "word_errors": 22,
+     "wer": 0.6470588235294118
+    },
+    "doctr_fast_parseq": {
+     "text": "p. 160-161, [23)) the wasserstein distance between gaus- sian and dirac pdf supported on r\", with respective joint pdfs s = - (u,e) and 8(x) - lim - (u,e), is given by,",
+     "word_errors": 12,
+     "wer": 0.35294117647058826
+    },
+    "lightonocr2_1b": {
+     "text": "e.g., p. 160-161, [23])) the wasserstein distance between gaussian and dirac pdf supported on rn , with respective joint pdfs ζ = n(μ, σ) and δ(x) =",
+     "word_errors": 15,
+     "wer": 0.4411764705882353
+    },
+    "qwen3_vl_2b": {
+     "text": "",
+     "word_errors": 34,
+     "wer": 1.0
+    }
+   }
+  },
+  "images": {
+   "crop": "20_most_missing_words_crop.png",
+   "page": "20_most_missing_words_page.png",
+   "box_scale": [
+    0.83,
+    1.044
+   ],
+   "image_size": [
+    830,
+    1044
+   ],
+   "crop_box": [
+    373,
+    802,
+    830,
+    977
+   ]
+  },
+  "output_head": "|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l|||l||"
+ }
+]
