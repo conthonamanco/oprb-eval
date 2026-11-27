@@ -12,7 +12,23 @@ Thước đo: CER, WER, Precision/Recall/F1 và thời gian suy luận.
 | LightOnOCR-2-1B | VLM chuyên OCR | Đọc cả trang một lần |
 | Qwen3-VL-2B-Instruct | VLM tổng quát | Đọc cả trang theo prompt |
 
-**Trạng thái:** đã có code cho cả 5 model và notebook chạy. Đã chạy pilot hai model CPU; chưa chạy pilot trên T4, chưa có kết quả.
+**Trạng thái:** cả 5 model đã đọc đủ 3.000 ảnh trên Kaggle, không ảnh nào lỗi, và được chấm ở commit `0f26a96`.
+Chưa đo thời gian suy luận (`latency`).
+
+## Kết quả trên 3.000 ảnh
+
+Trung bình trên từng ảnh; trong ngoặc là khoảng tin cậy bootstrap 95%. P/R/F1 không phụ thuộc thứ tự đọc nên giống
+nhau ở `normalized` và `columns`. *Bị cắt* là số trang VLM lặp một mẫu nên bị dừng sớm.
+
+| Model | CER `notebook` | CER `normalized` | CER `columns` | WER `columns` | P | R | F1 | Bị cắt |
+|---|---|---|---|---|---|---|---|---|
+| Tesseract 5 | 0,383 | 0,364 | 0,265 | 0,403 | 0,788 | 0,688 | 0,728 [0,722; 0,734] | 0 |
+| PP-OCRv5 mobile | 0,401 | 0,377 | 0,358 | 0,510 | 0,779 | 0,606 | 0,672 [0,666; 0,679] | 0 |
+| docTR | 0,370 | 0,355 | 0,273 | 0,414 | 0,809 | 0,704 | 0,744 [0,738; 0,750] | 0 |
+| LightOnOCR-2-1B | 0,507 | 0,362 | 0,252 | 0,370 | 0,830 | 0,757 | 0,786 [0,781; 0,792] | 48 |
+| Qwen3-VL-2B | 0,449 | 0,446 | 0,372 | 0,461 | 0,801 | 0,685 | 0,729 [0,721; 0,737] | 368 |
+
+Bảng đầy đủ theo vùng, loại vết, mật độ và bố cục: `results/<model>/summary_<giao thức>_sample3000_*.csv`.
 
 ## Cấu trúc
 
@@ -36,7 +52,8 @@ src/oprb_eval/
 tests/             unit test, chỉ cần thư viện chuẩn
 notebooks/run.ipynb  chạy một model trên Kaggle/Colab
 report/main.tex    khung báo cáo
-data/, results/    sinh ra khi chạy; dữ liệu và dự đoán thô không commit
+results/           danh sách mẫu, thống kê dữ liệu; mỗi model: summary_*.csv, run_config.json, sessions.jsonl
+data/              sinh ra khi chạy; dữ liệu, dự đoán thô và điểm từng ảnh không commit
 ```
 
 ## Chạy trên Kaggle hoặc Colab
