@@ -53,6 +53,7 @@ src/oprb_eval/
   cli.py           các lệnh download, stats, pilot, run, latency, score, analyze
 tests/             unit test, chỉ cần thư viện chuẩn
 notebooks/run.ipynb  chạy một model trên Kaggle/Colab
+notebooks/latency.ipynb  đo thời gian cả 5 model, nối tiếp nhau trong một phiên Kaggle T4
 report/main.tex    khung báo cáo
 results/           danh sách mẫu, thống kê dữ liệu; mỗi model: summary_*.csv, run_config.json, sessions.jsonl
 data/              sinh ra khi chạy; dữ liệu, dự đoán thô và điểm từng ảnh không commit
@@ -85,6 +86,9 @@ wait
 python -m oprb_eval score   --model qwen3_vl_2b --sample 3000
 python -m oprb_eval latency --model qwen3_vl_2b --sample 100
 ```
+
+Bảng thời gian dùng `notebooks/latency.ipynb`: cả 5 model đo lần lượt trong **một** phiên Kaggle T4, cùng 100 ảnh, batch 1,
+kết quả gom vào `results/latency_sample100.csv`.
 
 Phiên bị ngắt thì giữ lại thư mục `results/` và chạy lại đúng lệnh cũ: ảnh đã xong được bỏ qua, ảnh lỗi được thử lại.
 
