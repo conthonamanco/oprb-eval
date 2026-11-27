@@ -48,7 +48,9 @@ src/oprb_eval/
   runner.py        suy luận (batch, shard, resume) và đo thời gian
   env.py           ghi lại GPU và phiên bản thư viện của mỗi phiên
   score.py         chấm điểm, tổng hợp
-  cli.py           các lệnh download, stats, pilot, run, latency, score
+  analysis.py      bảng cho báo cáo: so sánh theo cặp, text/nontext, loại vết, mật độ, chọn ví dụ
+  figures.py       hình cho báo cáo (cần matplotlib)
+  cli.py           các lệnh download, stats, pilot, run, latency, score, analyze
 tests/             unit test, chỉ cần thư viện chuẩn
 notebooks/run.ipynb  chạy một model trên Kaggle/Colab
 report/main.tex    khung báo cáo
@@ -122,3 +124,27 @@ rồi mới sang cột phải bị CER/WER cao dù đúng từng chữ. P/R/F1 k
 Mọi bảng có thêm cột `layout` (`1col`/`2col`, phát hiện từ khung chữ của GT).
 
 Chấm lại không cần GPU: trên Kaggle chọn `STAGE = "score"`, không bật GPU, Add Input → Notebook Output của phiên `run`.
+
+## Phân tích
+
+Chạy trên máy nào cũng được, không cần GPU hay dữ liệu: chỉ đọc `results/<model>/per_image_*.csv` của cả 5 model.
+
+```bash
+pip install -e ".[analysis]"
+python -m oprb_eval analyze --sample 3000 --figures report/figures
+```
+
+Bảng ghi vào `results/analysis/`:
+
+| Bảng | Nội dung |
+|---|---|
+| `overall` | 5 model × 3 giao thức, thứ hạng theo CER trung bình, CER micro và F1 |
+| `paired` | mọi cặp model trên cùng ảnh: hiệu CER, CER micro, F1 và khoảng bootstrap 95% |
+| `category_gap` | `nontext` trừ `text`, cả chung và trong từng bố cục 1 cột / 2 cột |
+| `reference_lengths` | số trang theo độ dài GT (ký tự) |
+| `occlusion_type`, `density` | trung bình theo loại vết / mật độ, thứ hạng model trong từng ô; `*_spread`: loại tốt nhất, tệ nhất |
+| `error_direction` | precision so với recall, độ dài output so với GT: model bỏ chữ hay thêm chữ |
+| `qualitative_picks` | trang cho phần định tính, chọn theo quy tắc cố định trên điểm (trung vị, phân vị 5%, thêm/thiếu chữ nhiều nhất) |
+
+CER trung bình trên từng ảnh bị vài trang có GT rất ngắn chi phối (một từ thừa trên GT 2 ký tự là CER vài chục),
+nên các bảng ghi kèm trung vị và CER micro (tổng lỗi / tổng ký tự GT).

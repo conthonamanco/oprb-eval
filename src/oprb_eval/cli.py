@@ -6,7 +6,7 @@ import statistics
 from collections import Counter
 from pathlib import Path
 
-from . import data, env, models, pilot, runner, score
+from . import analysis, data, env, models, pilot, runner, score
 from .text import PSEUDO_TOKEN
 
 
@@ -155,6 +155,23 @@ def cmd_score(args) -> None:
             )
 
 
+def cmd_analyze(args) -> None:
+    tag = _tag(args)
+    tables = analysis.run(args.results, tag, args.results / "analysis")
+    print(f"wrote {len(tables)} tables to {args.results / 'analysis'}")
+    if args.figures:
+        from . import figures  # needs matplotlib, which the core does not
+
+        figures.run(args.results / "analysis", tag, args.figures)
+        print(f"wrote figures to {args.figures}")
+    for row in tables["overall"]:
+        print(
+            "{protocol:10} {model:20} CER={cer_mean:.4f} (rank {rank_cer}) "
+            "micro CER={cer_micro:.4f} (rank {rank_cer_micro}) "
+            "F1={f1_mean:.4f} (rank {rank_f1})".format(**row)
+        )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="oprb_eval")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -165,6 +182,7 @@ def main(argv: list[str] | None = None) -> int:
         "run": cmd_run,
         "latency": cmd_latency,
         "score": cmd_score,
+        "analyze": cmd_analyze,
     }
     for name, function in functions.items():
         sub = commands.add_parser(name)
@@ -183,7 +201,9 @@ def main(argv: list[str] | None = None) -> int:
             continue
         sub.add_argument("--sample", type=_positive, help="total number of random pages; omit for all 9,000")
         sub.add_argument("--seed", type=int, default=42)
-        if name == "stats":
+        if name == "analyze":
+            sub.add_argument("--figures", type=Path, metavar="DIR", help="also draw the figures into DIR")
+        if name in ("stats", "analyze"):
             continue
         sub.add_argument("--model", required=True)
         if name in ("run", "latency"):
