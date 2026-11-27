@@ -229,6 +229,17 @@ arXiv papers, so some pages or similar ones may have been seen in training.
 
 \section{Conclusion}
 % 0.25 page: which model for which situation.
+% TODO after the latency run: add seconds per page to each recommendation and check that none changes.
+On 3{,}000 occluded OPRB pages, the OCR-specialised VLM \textbf{LightOnOCR-2-1B} is the most accurate model
+(F1 .786, micro CER .183), with a higher F1 than each OCR pipeline on 80--86\,\% of pages, and among the least
+sensitive to the occlusion type; it is the choice when a GPU is available. Without a GPU, \textbf{Tesseract~5} (15\,MB) is
+the recommendation: its F1 matches the much larger general VLM, and only LightOnOCR has a lower micro CER.
+\textbf{docTR} (138\,MB) is the best of the OCR pipelines by F1 and a light option on a GPU.
+The general-purpose \textbf{Qwen3-VL-2B} brings no gain over these despite its 2.1\,B parameters, and it loops
+on one \texttt{nontext} page in five. \textbf{PP-OCRv5 mobile} trails on every measure on these
+English pages. Across all models, the type and density of the occlusion change F1 by a few points, far less
+than the choice of model, and every model loses text rather than inventing it. Finally, how a VLM is scored
+matters as much as which VLM is used: markup and reading order alone moved LightOnOCR from last to first by CER.
 
 \begin{thebibliography}{1}\small
 \bibitem{oprb} OPRB: Occluded Pages Restoration Benchmark. Dataset:
