@@ -1,0 +1,12 @@
+{
+  "model": "doctr_fast_parseq",
+  "fingerprint": "958c9ed67516319d",
+  "config": {
+    "adapter": "doctr",
+    "family": "ocr",
+    "det": "fast_base",
+    "rec": "parseq",
+    "assume_straight_pages": false
+  },
+  "created": "2026-11-26T15:58:43+00:00"
+}

@@ -1,0 +1,15 @@
+{
+  "model": "tesseract",
+  "fingerprint": "171182213e98ff81",
+  "config": {
+    "adapter": "tesseract",
+    "family": "ocr",
+    "lang": "eng",
+    "tessdata_tag": "4.1.0",
+    "tessdata_bytes": 15400601,
+    "psm": 3,
+    "scale": 3,
+    "deskew": true
+  },
+  "created": "2026-11-25T18:19:03+00:00"
+}

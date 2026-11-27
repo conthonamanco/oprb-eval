@@ -1,0 +1,18 @@
+{
+  "model": "qwen3_vl_2b",
+  "fingerprint": "97cc790b8f11f23f",
+  "config": {
+    "adapter": "qwen_vl",
+    "family": "vlm",
+    "hf_id": "Qwen/Qwen3-VL-2B-Instruct",
+    "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+    "dtype": "float16",
+    "image_size": {
+      "shortest_edge": 65536,
+      "longest_edge": 2097152
+    },
+    "max_new_tokens": 4096,
+    "prompt": "Transcribe all text visible on this document page in natural reading order. Return only the transcription, without introductory text or explanations. Do not describe the page, and do not invent text that you cannot read."
+  },
+  "created": "2026-11-26T03:57:27+00:00"
+}

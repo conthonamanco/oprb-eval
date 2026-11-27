@@ -1,0 +1,14 @@
+{
+  "model": "ppocrv5_mobile_en",
+  "fingerprint": "21339600ecb1315a",
+  "config": {
+    "adapter": "ppocr",
+    "family": "ocr",
+    "ocr_version": "PP-OCRv5",
+    "det_model": "mobile",
+    "rec_lang": "en",
+    "rec_model": "mobile",
+    "device": "cpu"
+  },
+  "created": "2026-11-26T15:55:30+00:00"
+}
