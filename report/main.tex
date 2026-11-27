@@ -1,134 +1,126 @@
-% Short report. Hard limit: fewer than 4 A4 pages, so the target is 3.
+% Báo cáo ngắn, viết bằng tiếng Việt. Giới hạn cứng: dưới 4 trang A4, mục tiêu 3 trang.
+% Biên dịch bằng pdfLaTeX (Overleaf có sẵn gói vntex cho bảng mã T5).
 \documentclass[10pt,a4paper]{article}
 \usepackage[margin=2cm]{geometry}
 \usepackage[utf8]{inputenc}
-\usepackage[T5,T1]{fontenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese]{babel}
 \usepackage{booktabs,graphicx,tabularx,hyperref}
-\title{Evaluating Lightweight Vision-Language and OCR Models\\on Occluded Document Images}
+\title{Đánh giá các mô hình OCR và thị giác--ngôn ngữ nhẹ\\trên ảnh tài liệu bị che khuất}
 \author{TODO}
 \date{}
 
 \begin{document}
 \maketitle
 
-\section{Introduction}
-Real documents carry ink marks, stamps, dust and correction fluid that hide part of the text.
-We ask how well \emph{lightweight} text recognisers read such pages, and at what cost:
-(i)~which model transcribes occluded pages most accurately,
-(ii)~which occlusions hurt most, and which model degrades least, and
-(iii)~how accuracy trades off against model size and inference time.
-We compare three OCR pipelines and two vision-language models (VLMs), ordered from reading only what is
-visible to predicting text from a language prior. All run zero-shot with their pretrained weights:
-nothing is trained or fine-tuned, and every setting comes from the model's documentation, fixed before
-the full run. Each model reads the same 3{,}000 test pages of OPRB~\cite{oprb}. We score every transcript
-under three protocols that separate reading errors from output format and reading order, and compare
-models page by page with bootstrap confidence intervals.
+\section{Giới thiệu}
+Tài liệu thực tế thường có vết mực, con dấu, bụi hay bút xoá che mất một phần chữ. Báo cáo trả lời ba câu hỏi
+về các mô hình nhận dạng chữ \emph{nhẹ} trên những trang như vậy: (i)~mô hình nào chép lại trang bị che chính
+xác nhất; (ii)~loại vết che nào gây hại nhiều nhất và mô hình nào bền nhất; (iii)~độ chính xác đánh đổi thế
+nào với kích thước mô hình và thời gian suy luận. Chúng tôi so sánh ba hệ OCR và hai mô hình thị giác--ngôn ngữ
+(VLM), sắp từ chỗ chỉ đọc phần nhìn thấy đến chỗ đoán chữ nhờ mô hình ngôn ngữ. Mọi mô hình chạy zero-shot
+với trọng số đã công bố: không huấn luyện hay tinh chỉnh, mọi thiết lập lấy từ tài liệu của mô hình và được
+cố định trước khi chạy. Cả năm mô hình đọc cùng 3000 trang test của OPRB~\cite{oprb}. Mỗi bản chép được chấm
+theo ba giao thức để tách lỗi đọc khỏi khác biệt về định dạng và thứ tự đọc; các mô hình được so theo cặp
+trên từng trang, kèm khoảng tin cậy bootstrap.
 
-\section{Dataset Statistics}
-OPRB~\cite{oprb} draws synthetic occlusions on English arXiv pages from DocBank and rotates every page by up
-to $\pm5^\circ$. Its test set has 6{,}000 pages occluded on text regions (\texttt{text}) and 3{,}000 on
-non-text regions (\texttt{nontext}). Models see only the image; the ground truth (GT), one token per line
-with its box, colour, font and layout class, is read only for scoring. Five models on 9{,}000 pages exceed
-our GPU budget, so we draw 3{,}000 pages at random (seed 42), stratified by region, occlusion type and
-density in the original proportions (Table~\ref{tab:data}); a sample mean thus estimates the test-set mean
-without weights. All models read the same pages.
+\section{Thống kê dữ liệu}
+OPRB~\cite{oprb} vẽ vết che tổng hợp lên các trang bài báo arXiv tiếng Anh của DocBank và xoay mỗi trang
+tới $\pm5^\circ$. Tập test có 6000 trang bị che trên vùng chữ (\texttt{text}) và 3000 trang bị che ngoài vùng
+chữ (\texttt{nontext}). Mô hình chỉ nhận ảnh; ground truth (GT), mỗi dòng một token kèm khung, màu, phông và
+loại bố cục, chỉ được đọc khi chấm điểm. Chạy năm mô hình trên 9000 trang vượt ngân sách GPU, nên chúng tôi
+lấy ngẫu nhiên 3000 trang (seed 42), phân tầng theo vùng, loại vết và mật độ đúng tỉ lệ gốc
+(Bảng~\ref{tab:data}); nhờ vậy trung bình trên mẫu ước lượng thẳng trung bình trên tập test, không cần trọng số.
 
 \begin{table}[h]
 \centering\small
-\caption{Pages per occlusion type in the test set and in our sample. Black Ink, White Whitener,
-White Burnt and Through Dust come in three densities (0.5\,\%, 1\,\%, 2\,\% of the page, in roughly
-equal shares); Sim and Through Stamp have no density level.}
+\caption{Số trang theo loại vết che trong tập test và trong mẫu. Black Ink, White Whitener, White Burnt và
+Through Dust có ba mức mật độ (0.5\,\%, 1\,\%, 2\,\% diện tích trang, số trang gần bằng nhau); Sim và Through
+Stamp không có mức mật độ.}
 \label{tab:data}
 \begin{tabular}{@{}llrrrrrrr@{}}
 \toprule
-Region & Pages & \shortstack[r]{Black\\Ink} & \shortstack[r]{White\\Whitener} & \shortstack[r]{White\\Burnt}
-  & \shortstack[r]{Through\\Dust} & \shortstack[r]{Through\\Stamp} & Sim & Total \\
+Vùng & Trang & \shortstack[r]{Black\\Ink} & \shortstack[r]{White\\Whitener} & \shortstack[r]{White\\Burnt}
+  & \shortstack[r]{Through\\Dust} & \shortstack[r]{Through\\Stamp} & Sim & Tổng \\
 \midrule
-\texttt{text}    & test set & 1{,}000 & 1{,}000 & 1{,}000 & 1{,}000 & 1{,}000 & 1{,}000 & 6{,}000 \\
-                 & sample   & 334 & 333 & 333 & 334 & 333 & 333 & 2{,}000 \\
-\texttt{nontext} & test set & 537 & 537 & 537 & 537 & 429 & 423 & 3{,}000 \\
-                 & sample   & 178 & 179 & 180 & 178 & 143 & 142 & 1{,}000 \\
+\texttt{text}    & tập test & 1000 & 1000 & 1000 & 1000 & 1000 & 1000 & 6000 \\
+                 & mẫu      & 334 & 333 & 333 & 334 & 333 & 333 & 2000 \\
+\texttt{nontext} & tập test & 537 & 537 & 537 & 537 & 429 & 423 & 3000 \\
+                 & mẫu      & 178 & 179 & 180 & 178 & 143 & 142 & 1000 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\paragraph{What the ground truth contains.} Several properties of the GT shape how scores should be read.
-First, DocBank marks lines and figures with placeholder tokens (\texttt{\#\#LTLine\#\#},
-\texttt{\#\#LTFigure\#\#}) that no model can read from the image. In the test set they are 1.5\,\% of GT
-tokens on \texttt{text} pages but 45\,\% on \texttt{nontext} pages, where one page holds 137{,}800. Without
-them, a sampled page has a median of 516 words (\texttt{text}) and 455 words (\texttt{nontext}).
-Second, the GT lists tokens along a whole printed line, so on a two-column page it alternates between
-the columns. Two-column pages make up 17\,\% of \texttt{text} but 44\,\% of \texttt{nontext} pages in
-the sample, so the two regions differ in layout as well as in where the occlusion falls. Third,
-according to the dataset card the GT describes the clean page, so text hidden under an occlusion still
-counts and the task is full-page recovery. A few pages have almost no text after removing placeholders
-(3 of 3{,}000 under 10 characters), which makes their per-page CER unbounded; we therefore also report
-median and micro-averaged CER. The test set contains six occlusion types; it has no \textit{Black Scribble}
-or \textit{Mixed} pages, so scribbles are not covered.
+\paragraph{GT chứa gì.} Vài đặc điểm của GT quyết định cách đọc điểm số. Thứ nhất, DocBank đánh dấu đường kẻ và
+hình bằng token giữ chỗ (\texttt{\#\#LTLine\#\#}, \texttt{\#\#LTFigure\#\#}) mà không mô hình nào đọc được từ ảnh.
+Trên tập test, chúng chiếm 1.5\,\% token GT ở \texttt{text} nhưng 45\,\% ở \texttt{nontext}, có trang chứa
+137\,800 token như vậy. Bỏ chúng đi, trung vị là 516 từ/trang (\texttt{text}) và 455 từ/trang (\texttt{nontext}).
+Thứ hai, GT liệt kê token theo cả dòng in, nên ở trang hai cột nó xen kẽ hai cột. Trang hai cột chiếm 17\,\%
+mẫu \texttt{text} nhưng 44\,\% mẫu \texttt{nontext}, tức hai vùng khác nhau cả về bố cục chứ không chỉ về vị
+trí vết che. Thứ ba, theo mô tả của bộ dữ liệu, GT là trang sạch: chữ nằm dưới vết che vẫn được tính, nên đây
+là bài toán khôi phục toàn trang. Ba trang gần như không còn chữ sau khi bỏ token giữ chỗ (dưới 10 ký tự), làm
+CER của riêng chúng không bị chặn; vì vậy chúng tôi báo thêm CER trung vị và CER micro. Tập test chỉ có sáu
+loại vết; không có \textit{Black Scribble} hay \textit{Mixed}, nên vết vẽ nguệch ngoạc không được đánh giá.
 
-\section{Model Descriptions}
-Table~\ref{tab:models} lists the five models. We chose them so that each step from top to bottom relies
-less on what is visible and more on a language prior, which lets the results explain \emph{why} a model
-is or is not robust.
+\section{Mô tả mô hình}
+Bảng~\ref{tab:models} liệt kê năm mô hình. Đi từ trên xuống, mô hình dựa ít dần vào phần nhìn thấy và nhiều
+dần vào mô hình ngôn ngữ; trục này giúp giải thích \emph{vì sao} một mô hình bền hay không.
 
 \begin{table}[h]
 \centering\small
-\caption{Evaluated models (released weights, pinned versions). Parameters and weight sizes as loaded.
-VLMs decode greedily with at most 4{,}096 new tokens; a page that repeats one pattern for its last 256
-tokens is stopped and marked \emph{truncated}.}
+\caption{Các mô hình được đánh giá (trọng số đã công bố, ghim phiên bản). Số tham số và dung lượng đo khi nạp.
+Hai VLM giải mã tham lam, tối đa 4096 token mới; trang lặp lại một mẫu suốt 256 token cuối bị dừng và đánh dấu
+\emph{bị cắt}.}
 \label{tab:models}
 \begin{tabularx}{\textwidth}{@{}llrrX@{}}
 \toprule
-Model & Recognition & Params & Weights & Hardware and settings \\
+Mô hình & Cách nhận dạng & Tham số & Trọng số & Phần cứng và thiết lập \\
 \midrule
-Tesseract 5.5 (\texttt{tessdata\_best}) & LSTM per line & -- & 15\,MB & CPU; $3\times$ upscale, deskew; automatic layout \\
-PP-OCRv5 mobile (English) & detector + CTC per line & -- & 13\,MB & CPU (ONNX); shared reading order \\
-docTR FAST-base + PARSeq & detector + AR decoder per word & 34\,M & 138\,MB & T4, fp32; rotated boxes; shared reading order \\
-LightOnOCR-2-1B & VLM for OCR & 1.0\,B & 2.8\,GB & T4; fp16 LM, fp32 vision encoder; long edge 1{,}540\,px; no prompt \\
-Qwen3-VL-2B-Instruct & general VLM & 2.1\,B & 4.3\,GB & T4, fp16; at most 2{,}048 visual tokens; transcription prompt \\
+Tesseract 5.5 (\texttt{tessdata\_best}) & LSTM theo dòng & -- & 15\,MB & CPU; phóng to $3\times$, khử nghiêng; tự phân trang \\
+PP-OCRv5 mobile (tiếng Anh) & detector + CTC theo dòng & -- & 13\,MB & CPU (ONNX); thứ tự đọc dùng chung \\
+docTR FAST-base + PARSeq & detector + decoder tự hồi quy theo từ & 34\,M & 138\,MB & T4, fp32; khung xoay; thứ tự đọc dùng chung \\
+LightOnOCR-2-1B & VLM chuyên OCR & 1.0\,B & 2.8\,GB & T4; LM fp16, bộ mã hoá ảnh fp32; cạnh dài 1540\,px; không prompt \\
+Qwen3-VL-2B-Instruct & VLM tổng quát & 2.1\,B & 4.3\,GB & T4, fp16; tối đa 2048 token ảnh; prompt yêu cầu chép chữ \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\textbf{Tesseract~5} is the classical CPU baseline. Its guide asks for at least 300\,DPI and deskewed pages;
-OPRB pages are about 95\,DPI, so we upscale by 3 and deskew. \textbf{PP-OCRv5 mobile} is a very small deep
-pipeline whose CTC recogniser reads each detected line from its pixels alone. \textbf{docTR} pairs the
-FAST-base detector with PARSeq, whose autoregressive decoder adds context within a word. For both detector
-pipelines one shared routine deskews the boxes, groups them into lines, splits columns and orders them.
-\textbf{LightOnOCR-2-1B} is trained end to end for page OCR and writes Markdown, with LaTeX for formulas; its
-card asks for a 1{,}540\,px longest edge. In fp16 its vision encoder produced NaN on a T4, so the encoder runs
-in fp32. \textbf{Qwen3-VL-2B-Instruct} is a general VLM with the strongest language model of the five; the
-prompt asks for all visible text in reading order, without describing the page or inventing unreadable text.
+\textbf{Tesseract~5} là mốc cổ điển chạy trên CPU. Hướng dẫn của nó yêu cầu ảnh từ 300\,DPI và đã khử nghiêng;
+trang OPRB khoảng 95\,DPI nên được phóng to 3 lần và khử nghiêng. \textbf{PP-OCRv5 mobile} là hệ học sâu rất nhỏ,
+bộ nhận dạng CTC đọc từng dòng chỉ từ điểm ảnh. \textbf{docTR} ghép detector FAST-base với PARSeq, có decoder tự
+hồi quy nên dùng được ngữ cảnh trong một từ. Với hai hệ có detector, một thủ tục chung khử nghiêng các khung,
+gom thành dòng, tách cột rồi sắp thứ tự. \textbf{LightOnOCR-2-1B} được huấn luyện đầu-cuối cho OCR cả trang và
+xuất Markdown, công thức viết bằng LaTeX; model card yêu cầu cạnh dài 1540\,px. Ở fp16 bộ mã hoá ảnh của nó cho
+NaN trên T4 nên phần này chạy fp32. \textbf{Qwen3-VL-2B-Instruct} là VLM tổng quát có mô hình ngôn ngữ mạnh nhất
+trong năm; prompt yêu cầu chép mọi chữ nhìn thấy theo thứ tự đọc, không mô tả trang, không bịa chữ không đọc được.
 
-\section{Experimental Results}
-% 1.6 pages. Every number below comes from results/analysis/*_sample3000.csv
-% (python -m oprb_eval analyze --sample 3000) or results/<model>/summary_*.csv.
-\subsection{Setup}
-docTR and the two VLMs ran on Kaggle with two NVIDIA T4 GPUs, one half of the pages per GPU;
-Tesseract and PP-OCR ran on 4-core Kaggle CPU sessions (PyTorch 2.11, Transformers 5.20). Every model read
-all 3{,}000 pages with no failed page; the loop guard stopped 48 LightOnOCR and 368 Qwen pages. Before
-scoring, both texts are NFKC-normalised, lower-cased and their whitespace collapsed. CER and WER are edit
-distances over characters and words divided by the reference length (so they can exceed 1); precision,
-recall and F1 compare the multisets of words, ignoring order, as in the sample notebook. We score under
-three protocols: \texttt{notebook} uses every GT token in file order, as the sample notebook does;
-\texttt{normalized} drops the placeholder tokens from the GT and Markdown, HTML and LaTeX markup from the
-output; \texttt{columns} also re-reads the GT column by column from its boxes. P/R/F1 are the same under
-\texttt{normalized} and \texttt{columns}. Intervals are 95\,\% bootstrap intervals over pages (1{,}000
-resamples); comparisons between models resample the per-page \emph{difference}, since all models read the
-same pages.
+\section{Kết quả thực nghiệm}
+% Mọi số dưới đây lấy từ results/analysis/*_sample3000.csv (python -m oprb_eval analyze --sample 3000)
+% hoặc results/<model>/summary_*.csv.
+\subsection{Thiết lập}
+docTR và hai VLM chạy trên Kaggle với hai GPU NVIDIA T4, mỗi GPU một nửa số trang; Tesseract và PP-OCR chạy
+trên phiên CPU 4 nhân của Kaggle (PyTorch 2.11, Transformers 5.20). Cả năm mô hình đọc đủ 3000 trang, không trang
+nào lỗi; bộ chặn lặp dừng 48 trang của LightOnOCR và 368 trang của Qwen. Trước khi chấm, cả hai văn bản được
+chuẩn hoá NFKC, chuyển chữ thường và gộp khoảng trắng. CER và WER là khoảng cách sửa theo ký tự và theo từ chia
+cho độ dài GT (nên có thể vượt 1); precision, recall và F1 so hai túi từ, không xét thứ tự, như notebook mẫu.
+Ba giao thức chấm: \texttt{notebook} dùng mọi token GT theo thứ tự trong file, như notebook mẫu;
+\texttt{normalized} bỏ token giữ chỗ khỏi GT và bỏ markup Markdown, HTML, LaTeX khỏi output; \texttt{columns}
+đọc lại GT theo từng cột từ khung của token. P/R/F1 giống nhau ở \texttt{normalized} và \texttt{columns}.
+Khoảng tin cậy là bootstrap 95\,\% trên trang (1000 lần lấy lại); khi so hai mô hình, ta lấy lại \emph{hiệu số}
+trên từng trang vì mọi mô hình đọc cùng các trang.
 
 \begin{table}[t]
 \centering\footnotesize
-\caption{Results on 3{,}000 pages. CER under the three protocols (mean over pages); under
-\texttt{columns} also the median and the micro average (all character errors over all reference
-characters). WER, P, R and F1 under \texttt{columns}. Trunc.: pages stopped by the loop guard. Best in bold.}
+\caption{Kết quả trên 3000 trang. CER theo ba giao thức (trung bình trên trang); với \texttt{columns} có thêm
+trung vị và CER micro (tổng lỗi ký tự chia tổng ký tự GT). WER, P, R, F1 theo \texttt{columns}. Cắt: số trang
+bị bộ chặn lặp dừng. In đậm: tốt nhất.}
 \label{tab:main}
 \setlength{\tabcolsep}{4.5pt}
 \begin{tabular}{@{}lrrrrrrrrlr@{}}
 \toprule
-& \multicolumn{3}{c}{CER (mean)} & \multicolumn{2}{c}{CER \texttt{columns}} & & & & & \\
+& \multicolumn{3}{c}{CER (trung bình)} & \multicolumn{2}{c}{CER \texttt{columns}} & & & & & \\
 \cmidrule(lr){2-4}\cmidrule(lr){5-6}
-Model & \texttt{notebook} & \texttt{normalized} & \texttt{columns} & median & micro & WER & P & R & F1 [95\,\% CI] & Trunc. \\
+Mô hình & \texttt{notebook} & \texttt{normalized} & \texttt{columns} & trung vị & micro & WER & P & R & F1 [KTC 95\,\%] & Cắt \\
 \midrule
 Tesseract 5      & .383 & .364 & .265 & .194 & .212 & .403 & .788 & .688 & .728 [.722, .734] & 0 \\
 PP-OCRv5 mobile  & .401 & .377 & .358 & .288 & .340 & .510 & .779 & .606 & .672 [.666, .679] & 0 \\
@@ -139,33 +131,33 @@ Qwen3-VL-2B      & .449 & .446 & .372 & .192 & .287 & .461 & .801 & .685 & .729 
 \end{tabular}
 \end{table}
 
-\subsection{Quantitative results}
-Table~\ref{tab:main} gives the results. \textbf{The protocol decides the ranking.} Under \texttt{notebook},
-docTR leads and LightOnOCR has the highest CER (.507): its Markdown and LaTeX, and the GT placeholders, count
-as errors. Removing them lowers its CER to .362 and lifts its F1 from .682 to .786, while the OCR pipelines
-change little. Reading the GT column by column lowers every model's CER further (Tesseract .364 to .265), and
-LightOnOCR then has the lowest CER by mean, median and micro average.
-\textbf{LightOnOCR is the most accurate model.} Its F1 exceeds docTR's, the runner-up, by .042
-[.039, .046] and is higher on 80\,\% of pages; it also beats every other model by micro CER. Tesseract and
-Qwen are indistinguishable by F1 (difference $-.001$ [$-.008$, $.006$]), though Tesseract has the lower micro
-CER (.212 vs.\ .287). PP-OCR is last on every measure.
-\textbf{All models drop text rather than add it.} Precision exceeds recall for every model (by .07 to .17),
-and the median output is shorter than the reference; on average the VLMs do not invent more text than the
-OCR pipelines. Qwen's errors are concentrated in a tail: 12\,\% of its pages loop, which is why its mean CER
-(.372) is nearly twice its median (.192). Mean CER is also pulled up by the few near-empty pages
-(Section~2), hence the wide intervals of mean CER; we rely on F1 and micro CER below.
+\subsection{Kết quả định lượng}
+Bảng~\ref{tab:main} tóm tắt kết quả. \textbf{Giao thức chấm quyết định thứ hạng.} Theo \texttt{notebook}, docTR
+dẫn đầu còn LightOnOCR có CER cao nhất (.507): Markdown, LaTeX của nó và token giữ chỗ trong GT đều bị tính là
+lỗi. Bỏ chúng đi, CER của LightOnOCR còn .362 và F1 tăng từ .682 lên .786, trong khi các hệ OCR gần như không
+đổi. Đọc GT theo cột làm CER của mọi mô hình giảm thêm (Tesseract từ .364 còn .265), và khi đó LightOnOCR có
+CER thấp nhất theo cả trung bình, trung vị lẫn micro.
+\textbf{LightOnOCR chính xác nhất.} F1 của nó hơn docTR, mô hình thứ hai, .042 [.039, .046] và cao hơn trên
+80\,\% số trang; nó cũng thắng mọi mô hình khác theo CER micro. Tesseract và Qwen không phân biệt được theo F1
+(hiệu $-.001$ [$-.008$, $.006$]), dù Tesseract có CER micro thấp hơn (.212 so với .287). PP-OCR đứng cuối ở mọi
+thước đo.
+\textbf{Mọi mô hình đều thiên về bỏ sót chữ hơn là thêm chữ.} Precision cao hơn recall ở cả năm mô hình (từ .07
+đến .17) và output trung vị ngắn hơn GT; tính trung bình, hai VLM không bịa thêm chữ nhiều hơn các hệ OCR. Lỗi
+của Qwen dồn ở phần đuôi: 12\,\% số trang bị lặp, nên CER trung bình (.372) gần gấp đôi trung vị (.192). CER
+trung bình còn bị vài trang gần như rỗng kéo lên (Mục~2), nên khoảng tin cậy của nó rộng; phần sau dựa vào F1
+và CER micro.
 
-\subsection{Text-region vs. non-text-region occlusions}
+\subsection{Vết che trên vùng chữ và ngoài vùng chữ}
 \begin{table}[t]
 \centering\footnotesize
-\caption{\texttt{nontext} minus \texttt{text} (F1, \texttt{columns}), for all pages and within each layout,
-with 95\,\% bootstrap intervals; micro CER per region; pages stopped by the loop guard.}
+\caption{\texttt{nontext} trừ \texttt{text} (F1, \texttt{columns}) trên mọi trang và trong từng bố cục, kèm
+khoảng tin cậy bootstrap 95\,\%; CER micro theo vùng; số trang bị cắt.}
 \label{tab:region}
 \begin{tabular}{@{}lrrrrrr@{}}
 \toprule
-& \multicolumn{3}{c}{F1 gap, \texttt{nontext} $-$ \texttt{text}} & \multicolumn{2}{c}{micro CER} & Trunc. \\
+& \multicolumn{3}{c}{Chênh lệch F1, \texttt{nontext} $-$ \texttt{text}} & \multicolumn{2}{c}{CER micro} & Cắt \\
 \cmidrule(lr){2-4}\cmidrule(lr){5-6}
-Model & all pages & one column & two columns & \texttt{text} & \texttt{nontext} & \texttt{text} / \texttt{nontext} \\
+Mô hình & mọi trang & một cột & hai cột & \texttt{text} & \texttt{nontext} & \texttt{text} / \texttt{nontext} \\
 \midrule
 Tesseract 5     & $+.046$ [$+.035$, $+.059$] & $+.038$ & $+.005$ & .216 & .205 & 0 / 0 \\
 PP-OCRv5 mobile & $+.001$ [$-.013$, $+.016$] & $-.018$ & $-.028$ & .316 & .390 & 0 / 0 \\
@@ -176,74 +168,69 @@ Qwen3-VL-2B     & $-.044$ [$-.062$, $-.025$] & $-.036$ & $-.054$ & .237 & .391 &
 \end{tabular}
 \end{table}
 
-Occlusions on non-text regions do \emph{not} make pages easier to read in any simple sense
-(Table~\ref{tab:region}). Tesseract, docTR and LightOnOCR score higher on \texttt{nontext} pages, but the gap
-vanishes on two-column pages ($|\Delta F1| \le .005$) and remains only on one-column pages, so it reflects
-which pages each region contains more than where the occlusion lies; the two regions are not a controlled
-comparison. Qwen is the exception: it is worse on \texttt{nontext} pages in both layouts, its micro CER rises
-from .237 to .391, and it loops on 19\,\% of \texttt{nontext} pages against 9\,\% of \texttt{text} pages.
-Pages with figures, tables and formulas push the general VLM into repetition far more often than the
-OCR-specialised one.
+Che ngoài vùng chữ \emph{không} đơn giản là làm trang dễ đọc hơn (Bảng~\ref{tab:region}). Tesseract, docTR và
+LightOnOCR đạt F1 cao hơn trên \texttt{nontext}, nhưng chênh lệch biến mất ở trang hai cột ($|\Delta F1| \le
+.005$) và chỉ còn ở trang một cột. Như vậy nó phản ánh việc mỗi vùng chứa những trang khác nhau hơn là vị trí
+vết che; hai vùng không phải một phép so sánh có kiểm soát. Qwen là ngoại lệ: kém hơn trên \texttt{nontext} ở
+cả hai bố cục, CER micro tăng từ .237 lên .391, và bị lặp ở 19\,\% trang \texttt{nontext} so với 9\,\% trang
+\texttt{text}, trong khi LightOnOCR chỉ lặp ở 2\,\% trang \texttt{nontext}.
 
-\subsection{Robustness to occlusion types}
+\subsection{Độ bền với từng loại vết che}
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/fig_occlusion_type.pdf}
-\caption{F1 (\texttt{columns}) under each occlusion type minus the model's mean F1 in that region, in points.
-Removing each model's mean leaves how much a type hurts (red) or helps (blue) that model. $n$: pages per type.}
+\caption{F1 (\texttt{columns}) dưới mỗi loại vết che trừ F1 trung bình của chính mô hình đó trong vùng, tính
+bằng điểm. Trừ trung bình của từng mô hình để thấy loại vết làm mô hình đó kém đi (đỏ) hay tốt lên (xanh).
+$n$: số trang mỗi loại.}
 \label{fig:types}
 \end{figure}
 
-The occlusion type matters little compared with the choice of model (Figure~\ref{fig:types}). Within a region,
-a model's best and worst type differ by .02 to .06 F1, while LightOnOCR and PP-OCR differ by .11. On
-\texttt{text} pages, the semi-transparent types hurt most: averaged over models, F1 is .711 under Through
-Stamp and .715 under Through Dust against .743 under White Burnt and .741 under Black Ink; the OCR
-pipelines are the most sensitive (Tesseract $-3.1$ points under Through Stamp, PP-OCR $-3.5$ under Through
-Dust). LightOnOCR and Qwen are the most uniform on \texttt{text} pages (ranges .024 and .020), PP-OCR the
-least (.060). Density has a consistent but small effect: going from 1\,\% to 2\,\% of the page occluded lowers
-F1 for every model on \texttt{text} pages, by .019 (LightOnOCR) to .034 (PP-OCR), and from 0.5\,\% to 2\,\% on
-\texttt{nontext} pages by .039 to .052; on \texttt{text} pages 0.5\,\% is not easier than 1\,\%. Because each
-original page appears with only one occlusion, these differences between types and densities also contain
-differences between pages, so small gaps should not be over-read.
+Loại vết che ảnh hưởng ít so với việc chọn mô hình (Hình~\ref{fig:types}). Trong một vùng, loại tốt nhất và tệ
+nhất của cùng một mô hình chỉ chênh .02 đến .06 F1, trong khi LightOnOCR và PP-OCR chênh nhau .11. Trên trang
+\texttt{text}, hai loại bán trong suốt gây hại nhiều nhất: tính trung bình qua các mô hình, F1 là .711 dưới
+Through Stamp và .715 dưới Through Dust, so với .743 dưới White Burnt và .741 dưới Black Ink. Các hệ OCR nhạy nhất
+(Tesseract $-3.1$ điểm dưới Through Stamp, PP-OCR $-3.5$ dưới Through Dust); LightOnOCR và Qwen đều nhất trên
+\texttt{text} (khoảng .024 và .020), PP-OCR kém đều nhất (.060). Mật độ có tác động nhất quán nhưng nhỏ: từ 1\,\%
+lên 2\,\% diện tích bị che, F1 của mọi mô hình trên \texttt{text} giảm .019 (LightOnOCR) đến .034 (PP-OCR); từ
+0.5\,\% lên 2\,\% trên \texttt{nontext} giảm .039 đến .052; trên \texttt{text}, mức 0.5\,\% không dễ hơn 1\,\%.
+Vì mỗi trang gốc chỉ xuất hiện với một loại vết, chênh lệch giữa các loại và các mức mật độ còn lẫn cả khác
+biệt giữa các trang, nên không nên diễn giải quá mức các chênh lệch nhỏ.
 
-\subsection{Qualitative examples}
-% TODO (needs the page images and GT, on Kaggle): at least three examples picked by the fixed rules in
-% results/analysis/qualitative_picks_sample3000.csv: the shared median page (all five models side by side),
-% a 5th-percentile page, and the pages with the most missing and the most extra words. Show the occluded
-% crop, the GT line and each model's output, with one sentence on what went wrong.
+\subsection{Ví dụ định tính}
+% TODO: dựng từ Output của notebooks/examples.ipynb (results/qualitative/examples.json và ảnh cắt).
+% Trang và đoạn trích chọn theo quy tắc cố định (src/oprb_eval/qualitative.py): trang trung vị chung (cả năm
+% mô hình trên cùng đoạn), trang phân vị 5 %, trang thiếu chữ và thừa chữ nhiều nhất. Mỗi ví dụ: ảnh cắt,
+% dòng GT, output của mô hình, một câu giải thích lỗi.
 
-\subsection{Efficiency}
-% TODO (after `latency --sample 100` for all five models in one Kaggle T4 session, 28/11): seconds per page
-% at batch 1 (mean, median, p95), peak VRAM, parameters and weight size; figure of F1 against seconds per
-% page (log scale), marker size = weight size, Pareto front. Throughput of the batched runs is not latency.
+\subsection{Hiệu năng}
+% TODO (sau notebooks/latency.ipynb, 28/11): giây/trang ở batch 1 (trung bình, trung vị, p95), đỉnh VRAM,
+% số tham số, dung lượng; hình F1 theo giây/trang (thang log), cỡ điểm = dung lượng, đường Pareto.
+% Thông lượng của các lượt chạy theo batch không phải độ trễ.
 
-\subsection{Limitations}
-We evaluate a stratified sample of 3{,}000 of the 9{,}000 test pages; intervals account for this sampling but
-small differences between cells of a few hundred pages remain uncertain. The GT describes the clean page, so
-every score mixes reading visible text with recovering hidden text, and the two cannot be separated without
-the clean images. The \texttt{columns} protocol re-reads the GT with the reading-order routine that also orders
-PP-OCR and docTR, which may favour those two slightly. Each model runs with one fixed setting from its
-documentation; other prompts, resolutions or token limits could change the VLM results, but choosing them
-on the test set would break the zero-shot protocol. OPRB pages come from arXiv, and LightOnOCR was trained on
-arXiv papers, so some pages or similar ones may have been seen in training.
+\subsection{Hạn chế}
+Chúng tôi đánh giá một mẫu phân tầng 3000 trong 9000 trang test; khoảng tin cậy đã tính đến việc lấy mẫu, nhưng
+chênh lệch nhỏ giữa các ô vài trăm trang vẫn chưa chắc chắn. GT là trang sạch, nên mọi điểm số trộn lẫn việc đọc
+chữ nhìn thấy với việc khôi phục chữ bị che, và không tách được hai phần này nếu không có ảnh sạch. Giao thức
+\texttt{columns} đọc lại GT bằng chính thủ tục sắp thứ tự dùng cho PP-OCR và docTR, nên có thể hơi có lợi cho
+hai mô hình này. Mỗi mô hình chạy một thiết lập cố định theo tài liệu; prompt, độ phân giải hay giới hạn token
+khác có thể đổi kết quả của VLM, nhưng chọn chúng trên tập test sẽ phá giao thức zero-shot. Trang OPRB lấy từ
+arXiv và LightOnOCR có huấn luyện trên bài báo arXiv, nên có thể nó đã thấy những trang này hoặc trang tương tự.
 
-\section{Conclusion}
-% 0.25 page: which model for which situation.
-% TODO after the latency run: add seconds per page to each recommendation and check that none changes.
-On 3{,}000 occluded OPRB pages, the OCR-specialised VLM \textbf{LightOnOCR-2-1B} is the most accurate model
-(F1 .786, micro CER .183), with a higher F1 than each OCR pipeline on 80--86\,\% of pages, and among the least
-sensitive to the occlusion type; it is the choice when a GPU is available. Without a GPU, \textbf{Tesseract~5} (15\,MB) is
-the recommendation: its F1 matches the much larger general VLM, and only LightOnOCR has a lower micro CER.
-\textbf{docTR} (138\,MB) is the best of the OCR pipelines by F1 and a light option on a GPU.
-The general-purpose \textbf{Qwen3-VL-2B} brings no gain over these despite its 2.1\,B parameters, and it loops
-on one \texttt{nontext} page in five. \textbf{PP-OCRv5 mobile} trails on every measure on these
-English pages. Across all models, the type and density of the occlusion change F1 by a few points, far less
-than the choice of model, and every model loses text rather than inventing it. Finally, how a VLM is scored
-matters as much as which VLM is used: markup and reading order alone moved LightOnOCR from last to first by CER.
+\section{Kết luận}
+% TODO sau khi đo thời gian: thêm giây/trang vào từng khuyến nghị và kiểm tra không khuyến nghị nào phải đổi.
+Trên 3000 trang OPRB bị che, VLM chuyên OCR \textbf{LightOnOCR-2-1B} chính xác nhất (F1 .786, CER micro .183),
+có F1 cao hơn từng hệ OCR trên 80--86\,\% số trang và thuộc nhóm ít bị ảnh hưởng nhất bởi loại vết che; đây là
+lựa chọn khi có GPU. Khi không có GPU, nên chọn \textbf{Tesseract~5} (15\,MB): F1 ngang VLM tổng quát lớn hơn
+nhiều, và chỉ LightOnOCR có CER micro thấp hơn. \textbf{docTR} (138\,MB) có F1 tốt nhất trong các hệ OCR và là
+lựa chọn nhẹ khi có GPU. \textbf{Qwen3-VL-2B} tổng quát không hơn các mô hình trên dù có 2.1 tỉ tham số, và bị
+lặp ở một trên năm trang \texttt{nontext}. \textbf{PP-OCRv5 mobile} kém nhất ở mọi thước đo trên các trang tiếng
+Anh này. Với mọi mô hình, loại và mật độ vết che chỉ làm F1 đổi vài điểm, ít hơn nhiều so với việc chọn mô hình,
+và mô hình nào cũng bỏ sót chữ chứ không bịa thêm. Cuối cùng, cách chấm một VLM quan trọng ngang việc chọn VLM
+nào: chỉ riêng markup và thứ tự đọc đã đưa LightOnOCR từ hạng cuối lên hạng nhất theo CER.
 
 \begin{thebibliography}{1}\small
-\bibitem{oprb} OPRB: Occluded Pages Restoration Benchmark. Dataset:
-\url{https://huggingface.co/datasets/kpurkayastha/OPRB}; paper: arXiv:2604.10077.
+\bibitem{oprb} OPRB: Occluded Pages Restoration Benchmark. Bộ dữ liệu:
+\url{https://huggingface.co/datasets/kpurkayastha/OPRB}; bài báo: arXiv:2604.10077.
 \end{thebibliography}
 
 \end{document}

@@ -81,7 +81,7 @@ def occlusion_heatmap(analysis_dir: Path, tag: str, out: Path, protocol: str = "
         ax.set_xticks(range(len(TYPES)), [f"{t.replace('_', chr(10))}\nn={n}" for t, n in zip(TYPES, counts)],
                       rotation=0, fontsize=6)
         ax.set_yticks(range(len(MODELS)), [NAMES[m] for m in MODELS])
-        ax.set_title(f"{category} pages", color=TEXT, fontsize=8.5, loc="left")
+        ax.set_title(f"Trang {category}", color=TEXT, fontsize=8.5, loc="left")
         ax.tick_params(length=0)
         for spine in ax.spines.values():
             spine.set_visible(False)
@@ -91,7 +91,7 @@ def occlusion_heatmap(analysis_dir: Path, tag: str, out: Path, protocol: str = "
                 ax.text(j, i, f"{value:+.1f}", ha="center", va="center", fontsize=6.5,
                         color="white" if strong else TEXT)
     bar = fig.colorbar(image, ax=axes, shrink=0.85, pad=0.02)
-    bar.set_label("F1 minus model's mean (points)", color=MUTED, fontsize=7)
+    bar.set_label("F1 trừ trung bình của mô hình (điểm)", color=MUTED, fontsize=7)
     bar.outline.set_visible(False)
     _save(fig, out, "fig_occlusion_type")
 
@@ -115,11 +115,11 @@ def density_lines(analysis_dir: Path, tag: str, out: Path, protocol: str = "colu
                   for d, _ in DENSITIES]
         ax.set_xticks(xs, [f"{x:g}%\nn={n}" for x, n in zip(xs, counts, strict=True)])
         ax.set_xlim(0.35, 2.9)
-        ax.set_title(f"{category} pages", color=TEXT, fontsize=8.5, loc="left")
-        ax.set_xlabel("occluded area", color=MUTED)
+        ax.set_title(f"Trang {category}", color=TEXT, fontsize=8.5, loc="left")
+        ax.set_xlabel("diện tích bị che", color=MUTED)
         ax.grid(axis="y", color=GRID, linewidth=0.6)
         ax.set_axisbelow(True)
-    axes[0].set_ylabel("mean F1")
+    axes[0].set_ylabel("F1 trung bình")
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, frameon=False, fontsize=7, loc="lower center", ncol=len(MODELS),
                bbox_to_anchor=(0.5, -0.2))

@@ -172,6 +172,31 @@ def cmd_analyze(args) -> None:
         )
 
 
+def cmd_examples(args) -> None:
+    from . import qualitative
+
+    tag = _tag(args)
+    picks = qualitative.read_picks(args.picks or args.results / "analysis" / f"qualitative_picks_{tag}.csv")
+    pages = {p.key: p for p in _pages(args)}
+    missing = sorted({p["key"] for p in picks} - pages.keys())
+    if missing:
+        raise SystemExit(f"{len(missing)} picked pages are not in --sample {args.sample}, e.g. {missing[0]}")
+    predictions = {}
+    for model in analysis.MODELS:
+        records = runner.load_predictions(args.results / model)
+        absent = [p["key"] for p in picks if p["key"] not in records]
+        if absent:
+            raise SystemExit(f"{model}: no prediction for {len(absent)} picked pages; restore its results first.")
+        predictions[model] = records
+    out = args.out or args.results / "qualitative"
+    examples = qualitative.build(picks, pages, predictions, out)
+    for e in examples:
+        shown = e.get("excerpt", {})
+        wers = {m: round(v["wer"], 2) for m, v in shown.get("models", {}).items()}
+        print(f"{e['rule']:18} {e['model']:18} {e['key'][:60]:60} WER {wers}")
+    print(f"wrote {len(examples)} examples to {out}")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="oprb_eval")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -183,6 +208,7 @@ def main(argv: list[str] | None = None) -> int:
         "latency": cmd_latency,
         "score": cmd_score,
         "analyze": cmd_analyze,
+        "examples": cmd_examples,
     }
     for name, function in functions.items():
         sub = commands.add_parser(name)
@@ -203,7 +229,10 @@ def main(argv: list[str] | None = None) -> int:
         sub.add_argument("--seed", type=int, default=42)
         if name == "analyze":
             sub.add_argument("--figures", type=Path, metavar="DIR", help="also draw the figures into DIR")
-        if name in ("stats", "analyze"):
+        if name == "examples":
+            sub.add_argument("--picks", type=Path, help="default: results/analysis/qualitative_picks_<tag>.csv")
+            sub.add_argument("--out", type=Path, help="default: results/qualitative")
+        if name in ("stats", "analyze", "examples"):
             continue
         sub.add_argument("--model", required=True)
         if name in ("run", "latency"):

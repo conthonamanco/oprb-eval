@@ -50,10 +50,12 @@ src/oprb_eval/
   score.py         chấm điểm, tổng hợp
   analysis.py      bảng cho báo cáo: so sánh theo cặp, text/nontext, loại vết, mật độ, chọn ví dụ
   figures.py       hình cho báo cáo (cần matplotlib)
-  cli.py           các lệnh download, stats, pilot, run, latency, score, analyze
+  qualitative.py   đoạn trích cho phần định tính: cùng vài dòng GT và output của từng model
+  cli.py           các lệnh download, stats, pilot, run, latency, score, analyze, examples
 tests/             unit test, chỉ cần thư viện chuẩn
 notebooks/run.ipynb  chạy một model trên Kaggle/Colab
 notebooks/latency.ipynb  đo thời gian cả 5 model, nối tiếp nhau trong một phiên Kaggle T4
+notebooks/examples.ipynb ví dụ định tính cho báo cáo (Kaggle CPU, cần GT và ảnh)
 report/main.tex    khung báo cáo
 results/           danh sách mẫu, thống kê dữ liệu; mỗi model: summary_*.csv, run_config.json, sessions.jsonl
 data/              sinh ra khi chạy; dữ liệu, dự đoán thô và điểm từng ảnh không commit
